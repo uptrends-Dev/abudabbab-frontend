@@ -11,8 +11,8 @@ import {
   FiCalendar,
   FiUsers,
 } from "react-icons/fi";
-import { setUserInfo, setTripId } from "../../app/store/bookingSlice";
-import { postBooking, clearBookingState } from "../../lib/apis/bookingsApi";
+import { setUserInfo, setTripId } from "@/app/store/bookingSlice";
+import { postBooking, clearBookingState } from "@/lib/apis/bookingsApi";
 import Link from "next/link";
 import { IoIosArrowForward } from "react-icons/io";
 
