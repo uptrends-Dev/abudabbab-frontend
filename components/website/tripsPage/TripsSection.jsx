@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchTripsData } from "../../lib/apis/tripsApi"; // استيراد الـ action
-import { setTripId } from "../store/bookingSlice";
+import { fetchTripsData } from "@/lib/apis/tripsApi"; // استيراد الـ action
+import { setTripId } from "@/app/store/bookingSlice";
 
 const container = {
   hidden: { opacity: 0 },
