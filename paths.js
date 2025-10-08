@@ -5,3 +5,4 @@ export const TOTALS_URL = `${BASE}/bookings/getTotalBookingsAndRevenue/admin`
 export const TRIPS_URL = `${BASE}/trips`
 export const TRIP_API_ADMIN = `${BASE}/trips/admin`
 export const BOOKING_ADMIN = `${BASE}/bookings/admin`
+export const LOGIN = `${BASE}/admin/auth/login`
