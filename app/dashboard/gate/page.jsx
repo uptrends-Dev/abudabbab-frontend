@@ -6,6 +6,9 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { getToken } from "@/lib/helpers/token";
 import { getBooking } from "@/lib/apis/api";
+import { BOOKING_ADMIN } from "@/paths";
+
+// const url = "https://abudabbba-backend.vercel.app/api/bookings/admin"
 
 export default function GatePage() {
   const [status, setStatus] = useState("Point the camera towards the QR code");
@@ -71,7 +74,7 @@ export default function GatePage() {
     try {
       // const response = await axios.patch(`https://abudabbba-backend.vercel.app/api/bookings/admin/${id}`, { payment: true });
       const response = await axios.patch(
-        `https://abudabbba-backend.vercel.app/api/bookings/admin/${id}`,
+        `${BOOKING_ADMIN}/${id}`,
         { payment: true },
         {
           headers: {
@@ -95,7 +98,7 @@ export default function GatePage() {
     try {
       // const response = await axios.patch(`https://abudabbba-backend.vercel.app/api/bookings/admin/${id}`, { checkIn: true });
       const response = await axios.patch(
-        `https://abudabbba-backend.vercel.app/api/bookings/admin/${id}`,
+        `${BOOKING_ADMIN}/${id}`,
         { checkIn: true },
         {
           headers: {
@@ -123,7 +126,7 @@ export default function GatePage() {
       setError("");
       console.log(`${decoded.bid}`);
       try {
-        const data = await getBooking(`https://abudabbba-backend.vercel.app/api/bookings/admin/${decoded.bid}`);
+        const data = await getBooking(`${BOOKING_ADMIN}/${decoded.bid}`);
 
         if (!cancelled) setBooking(data.data);
       } catch (error) {
