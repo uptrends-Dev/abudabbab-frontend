@@ -1,0 +1,24 @@
+{
+  // Ignore heavy folders from file watching and search
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.next/**": true
+  },
+  "search.exclude": {
+    "**/node_modules/**": true,
+    "**/.next/**": true
+  },
+
+  // Disable format and lint on every save to avoid slowdown
+  "editor.formatOnSave": false,
+  "eslint.run": "onType", // run ESLint only while typing, not on save
+
+  // Improve TypeScript performance
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+
+  // Tailwind CSS settings (optional regex for custom class names)
+  "tailwindCSS.experimental.classRegex": [
+    "cn\\(([^)]*)\\)"
+  ],
+  "files.autoSave": "onWindowChange"
+}
