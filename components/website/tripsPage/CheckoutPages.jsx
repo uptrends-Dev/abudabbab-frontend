@@ -15,6 +15,7 @@ import { setUserInfo, setTripId } from "@/app/store/bookingSlice";
 import { postBooking, clearBookingState } from "@/lib/apis/bookingsApi";
 import Link from "next/link";
 import { IoIosArrowForward } from "react-icons/io";
+import { BOOKING } from "@/paths";
 
 export default function CheckoutSection() {
   const bookingState = useSelector((state) => state.bookings);
@@ -63,7 +64,7 @@ export default function CheckoutSection() {
     try {
       const created = await dispatch(
         postBooking({
-          url: "https://abudabbba-backend.vercel.app/api/bookings",
+          url: BOOKING,
         })
       ).unwrap();
 

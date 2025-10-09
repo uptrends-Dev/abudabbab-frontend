@@ -1,5 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import { checkOut } from "./api";
 
 // GET all bookings
 export const getAllBookings = createAsyncThunk(
@@ -47,10 +48,7 @@ export const postBooking = createAsyncThunk(
         ...(bookingDate ? { bookingDate } : {}),
       };
 
-      const res = await axios.post(url, payload, {
-        headers: { "Content-Type": "application/json" },
-        validateStatus: (st) => st >= 200 && st < 300, // بس 2xx تعتبر نجاح
-      });
+      const res = await checkOut(payload);
 
       // ✅ لو الباك بيرجع أي شكل (doc مباشرة / data / booking ...)
       const created =
