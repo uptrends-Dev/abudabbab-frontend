@@ -5,7 +5,7 @@ import QrAutoScanner from "@/components/admin/QrAutoScanner";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { getToken } from "@/lib/helpers/token";
-import { getBooking } from "@/lib/apis/api";
+import { checkedInBooking, getBooking, paidBooking } from "@/lib/apis/api";
 import { BOOKING_ADMIN } from "@/paths";
 
 // const url = "https://abudabbba-backend.vercel.app/api/bookings/admin"
@@ -69,20 +69,10 @@ export default function GatePage() {
 
   // Define the API requests for "Mark as Paid" and "Mark as Checked-in"
   const handleMarkAsPaid = async (id) => {
-    const token = await getToken();
-    console.log(token);
+
     try {
       // const response = await axios.patch(`https://abudabbba-backend.vercel.app/api/bookings/admin/${id}`, { payment: true });
-      const response = await axios.patch(
-        `${BOOKING_ADMIN}/${id}`,
-        { payment: true },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json", // axios sets this automatically for plain objects
-          },
-        }
-      );
+      const response = await paidBooking(id)
       console.log(response.data);
       setBooking((prevBooking) => ({
         ...prevBooking,
@@ -94,19 +84,10 @@ export default function GatePage() {
   };
 
   const handleMarkAsCheckedIn = async (id) => {
-    const token = await getToken();
+
     try {
       // const response = await axios.patch(`https://abudabbba-backend.vercel.app/api/bookings/admin/${id}`, { checkIn: true });
-      const response = await axios.patch(
-        `${BOOKING_ADMIN}/${id}`,
-        { checkIn: true },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await checkedInBooking(id)
       console.log(response.data);
       setBooking((prevBooking) => ({
         ...prevBooking,
