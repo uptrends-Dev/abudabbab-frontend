@@ -33,7 +33,7 @@ export default function TripsSection() {
   };
   useEffect(() => {
     // طلب البيانات من الـ API عند تحميل المكون
-    dispatch(fetchTripsData("https://abudabbba-backend.vercel.app/api/trips"));
+    dispatch(fetchTripsData("https://abudabbab-backend.vercel.app/api/trips"));
   }, [dispatch]);
 
   if (loading) return <div className="loader"></div>;

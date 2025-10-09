@@ -51,7 +51,7 @@ export default function Page() {
         setLoading(true);
         const BASE =
           process.env.NEXT_PUBLIC_API_URL ||
-          "https://abudabbba-backend.vercel.app/api";
+          "https://abudabbab-backend.vercel.app/api";
         const res = await axios.get(`${BASE}/trips/${id}`);
         if (!mounted) return;
         setTrip(res.data.data);
