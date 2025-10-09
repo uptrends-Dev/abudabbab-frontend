@@ -1,17 +1,16 @@
 "use client"
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import { getallTrips } from "./api";
 
 
 // GET all trips
 export const fetchTripsData = createAsyncThunk(
   "trips/fetchTripsData",
   async (url) => {
-    
-    const response = await axios.get(url);
-    // const response = await getTrips(url)
-    // console.log(response)
-    return response.data;
+    const response = await getallTrips(url)
+    console.log(response)
+    return response;
   }
 );
 // POST trip

@@ -7,8 +7,6 @@ import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { setBookingDetails } from "@/app/store/bookingSlice";
 
-
-
 export default function Page() {
   const { id } = useParams();
   const router = useRouter();
