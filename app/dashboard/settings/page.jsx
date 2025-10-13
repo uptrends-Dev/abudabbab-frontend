@@ -123,9 +123,12 @@ export default function UsersPage() {
 
           const res = await updateUser(`${API_BASE}/updateuser`, payload);
           const data = res;
-          setUsers((prev) =>
-            prev.map((u) => (u._id === data.user._id ? { ...u, ...data.user } : u))
-          );
+          console.log("Update response:", data);
+          console.log("Update response:", users);
+
+          // setUsers((prev) =>
+          //   prev.map((u) => (u._id === data.user.id ? { ...u, ...data.user } : u))
+          // );
           setModalOpen(false);
         } catch (error) {
           console.error("Error updating user:", error);

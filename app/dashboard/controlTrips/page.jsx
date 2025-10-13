@@ -142,7 +142,7 @@ export default function DashboardTrips() {
               ADD
             </Link>
             {/* TODO: delete all handler */}
-            <Link href={'/trips'}>
+            <Link href={'/'}>
               <button className=" cursor-pointer flex justify-center items-center gap-2 px-4 py-2 rounded-xl border border-yellow-700 bg-yellow-900/30 hover:bg-yellow-900/40 text-sm font-medium">
                 <span> Preview</span>  <MdOutlineRemoveRedEye />
               </button>
