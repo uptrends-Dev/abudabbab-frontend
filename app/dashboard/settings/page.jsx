@@ -2,18 +2,17 @@
 
 import { deleteUser, getUsers, registerUser, updateUser } from "@/lib/apis/api";
 import { AUTH } from "@/paths";
-import { useRouter } from "next/navigation";
 import React from "react";
-
 
 const API_BASE = AUTH; // ← change if your authRouter is mounted elsewhere
 const ROLES = ["SUPER_ADMIN", "FINANCE", "ADMIN", "EMPLOYEE", "GATE"]; // finance not allowed in register per your controller
 
 export default function UsersPage() {
-  // const router = useRouter();
   const [users, setUsers] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
+  const [searchQuery, setSearchQuery] = React.useState(""); // For searching by username/email
+  const [roleFilter, setRoleFilter] = React.useState(""); // For filtering by role
   const [modalOpen, setModalOpen] = React.useState(false);
   const [mode, setMode] = React.useState("create"); // "create" | "edit"
   const [form, setForm] = React.useState({
@@ -48,9 +47,14 @@ export default function UsersPage() {
     return () => { alive = false; };
   }, []);
 
-  // Separate SUPER_ADMIN users
-  const superAdmins = users.filter((user) => user.role === "SUPER_ADMIN");
-  const otherUsers = users.filter((user) => user.role !== "SUPER_ADMIN");
+  // Filter users based on search and role
+  const filteredUsers = users.filter((user) => {
+    const usernameMatch = user.username.toLowerCase().includes(searchQuery.toLowerCase());
+    const emailMatch = user.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const roleMatch = roleFilter ? user.role === roleFilter : true;
+
+    return (usernameMatch || emailMatch) && roleMatch;
+  });
 
   function openCreate() {
     setMode("create");
@@ -164,40 +168,28 @@ export default function UsersPage() {
 
   return (
     <div className="max-w-6xl mx-auto p-4">
-      {/* Display SUPER_ADMIN in a Card */}
-      {superAdmins.length > 0 && (
-        <div className="flex justify-center mb-4">
-          {superAdmins.map((admin) => (
-            <div
-              key={admin._id}
-              className="bg-zinc-800 p-6 rounded-lg shadow-lg w-full max-w-[350px] flex flex-col items-center justify-center"
-            >
-              <h2 className="text-2xl text-zinc-100 font-semibold text-center">{admin.username}</h2>
-              <p className="text-zinc-400 text-center">{admin.email}</p>
-              <p className="text-zinc-400 text-center">{admin.role}</p>
-              <p className="text-zinc-400 text-center">{admin.bio}</p>
-              <div className="flex gap-2 mt-4 justify-center">
-                <button
-                  onClick={() => openEdit(admin)}
-                  className="px-4 py-2 rounded border border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800"
-                >
-                  Edit
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Add User Button */}
+      {/* Search and Role Filter */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-lg font-semibold text-zinc-100">Manage Users</h1>
-        <button
-          onClick={openCreate}
-          className="px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800"
-        >
-          + Add User
-        </button>
+        <div className="flex gap-4">
+          <input
+            type="text"
+            className="px-3 py-2 rounded border border-zinc-700 bg-zinc-900 text-zinc-100"
+            placeholder="Search by username/email"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <select
+            className="px-3 py-2 rounded border border-zinc-700 bg-zinc-900 text-zinc-100"
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+          >
+            <option value="">All Roles</option>
+            {ROLES.map((r) => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Error message */}
@@ -224,7 +216,7 @@ export default function UsersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800">
-              {otherUsers.map((u) => (
+              {filteredUsers.map((u) => (
                 <tr key={u._id} className="[&>td]:px-3 [&>td]:py-2 text-zinc-200">
                   <td className="font-medium">{u.username}</td>
                   <td className="text-zinc-400">{u.email}</td>
@@ -252,7 +244,7 @@ export default function UsersPage() {
                   </td>
                 </tr>
               ))}
-              {otherUsers.length === 0 && (
+              {filteredUsers.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-3 py-6 text-center text-zinc-500">
                     No users found.
