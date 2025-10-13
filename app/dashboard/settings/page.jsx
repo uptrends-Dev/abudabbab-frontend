@@ -2,12 +2,15 @@
 
 import { deleteUser, getUsers, registerUser, updateUser } from "@/lib/apis/api";
 import { AUTH } from "@/paths";
+import { useRouter } from "next/navigation";
 import React from "react";
+
 
 const API_BASE = AUTH; // ← change if your authRouter is mounted elsewhere
 const ROLES = ["SUPER_ADMIN", "FINANCE", "ADMIN", "EMPLOYEE", "GATE"]; // finance not allowed in register per your controller
 
 export default function UsersPage() {
+  // const router = useRouter();
   const [users, setUsers] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
@@ -127,6 +130,7 @@ export default function UsersPage() {
           prev.map((u) => (u._id === res.data.user._id ? { ...u, ...res.data.user } : u))
         );
         setModalOpen(false);
+        // router.refresh(); // Refresh to update any server-side rendered data
       }
     } catch (e) {
       setError(e.message || "Request failed");
