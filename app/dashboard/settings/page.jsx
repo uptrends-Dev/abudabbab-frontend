@@ -120,7 +120,7 @@ export default function UsersPage() {
           payload.password = form.password;
         }
 
-        const res = await updateUser(`${API_BASE}/updateuser`, payload);
+        const res = await updateUser(`${API_BASE}/updateuser/${form.id}`, payload);
         // if (!res.ok) throw new Error(res?.message || "Failed to update user");
         const data = res;
         // Replace updated user in list
@@ -141,7 +141,7 @@ export default function UsersPage() {
     setSubmitting(true);
     setError("");
     try {
-      await deleteUser(`${API_BASE}/deleteuser/${id}`);
+      await deleteUser(`${API_BASE}/deleteuser`, id);
       // if (!res.ok) throw new Error(res?.message || "Failed to delete user");
       // Remove from list
       setUsers((prev) => prev.filter((u) => u._id !== id));
