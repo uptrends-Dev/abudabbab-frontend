@@ -3,7 +3,6 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { getallTrips } from "./api";
 
-
 // GET all trips
 export const fetchTripsData = createAsyncThunk(
   "trips/fetchTripsData",

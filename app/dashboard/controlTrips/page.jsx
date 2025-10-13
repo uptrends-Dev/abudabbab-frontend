@@ -1,136 +1,50 @@
 "use client";
-
-
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { deleletrip, getallTrips } from "@/lib/apis/api";
 import { TRIP_API_ADMIN, TRIPS_URL } from "@/paths";
 
-
-
 /* ---------- Page ---------- */
 export default function DashboardTrips() {
-  const [trips, setTrips] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [trips, setTrips] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-
-  // fetch once
+  // Fetch trips on component mount
   useEffect(() => {
-    // dispatch(fetchTripsData(API_LIST));
-
-    getTrips()
+    getTrips();
   }, []);
 
-  // delete one
+  // Handle delete trip
   const handleDelete = async (id) => {
     if (!confirm("Delete this trip?")) return;
     try {
-      // await dispatch(deleteTrip({ url: API_ADMIN, id })).unwrap();
-      await deleletrip({ url: TRIP_API_ADMIN, id })
+      await deleletrip({ url: TRIP_API_ADMIN, id });
     } catch (e) {
       const errorMessage = e?.message || e?.payload?.message || "Delete failed";
       alert(`Error: ${errorMessage}`);
     }
   };
 
+  // Fetch trips from API
   async function getTrips() {
-    setLoading(true)
+    setLoading(true);
+    setError(""); // Reset error state before attempting to fetch
     try {
-      const trip = await getallTrips(TRIPS_URL)
-      setTrips(trip)
-      // console.log(trip)
+      const trip = await getallTrips(TRIPS_URL);
+      setTrips(trip);
     } catch (error) {
-      setError("error")
+      setError("Error loading trips. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false)
   }
-  // retry function
+
+  // Retry fetching trips
   const handleRetry = async () => {
-    getTrips()
+    getTrips();
   };
-
-  // const [trips, setTrips] = useState([]);
-  // const [loading, setLoading] = useState(false);
-  // const [error, setError] = useState("");
-
-  // // avoid setting state after unmount
-  // const isMounted = useRef(true);
-
-  // const getErrorMessage = (e) =>
-  //   e?.message || e?.payload?.message || e?.response?.data?.message || "Something went wrong";
-
-  // // fetch list (no signal)
-  // const getTrips = useCallback(async () => {
-  //   setLoading(true);
-  //   setError("");
-
-  //   try {
-  //     const data = await getallTrips(TRIPS_URL);
-  //     if (!isMounted.current) return;
-  //     setTrips(Array.isArray(data) ? data : []);
-  //   } catch (e) {
-  //     if (!isMounted.current) return;
-  //     setError(getErrorMessage(e));
-  //   } finally {
-  //     if (isMounted.current) setLoading(false);
-  //   }
-  // }, []);
-
-  // // delete one (optimistic, rollback on fail)
-  // const handleDelete = useCallback(
-  //   async (id) => {
-  //     if (!id) return;
-  //     if (!window.confirm("Delete this trip?")) return;
-
-  //     const prev = trips;
-  //     setTrips((cur) => cur.filter((t) => t.id !== id));
-
-  //     try {
-  //       await deleletrip({ url: TRIP_API_ADMIN, id }); // keep your original function name
-  //     } catch (e) {
-  //       alert(`Error: ${getErrorMessage(e)}`);
-  //       setTrips(prev); // rollback
-  //     }
-  //   },
-  //   [trips]
-  // );
-
-  // const handleRetry = useCallback(() => {
-  //   getTrips();
-  // }, [getTrips]);
-
-  // // fetch once
-  // useEffect(() => {
-  //   isMounted.current = true;
-  //   getTrips();
-  //   return () => {
-  //     isMounted.current = false;
-  //   };
-  // }, [getTrips]);
-
-  // // ----- UI -----
-  // if (loading && trips.length === 0) {
-  //   return (
-  //     <section className="p-4">
-  //       <p>Loading trips…</p>
-  //     </section>
-  //   );
-  // }
-
-  // if (error && trips.length === 0) {
-  //   return (
-  //     <section className="p-4">
-  //       <p role="alert" style={{ color: "crimson" }}>{error}</p>
-  //       <button onClick={handleRetry}>Retry</button>
-  //     </section>
-  //   );
-  // }
-
-
-
-
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -138,19 +52,22 @@ export default function DashboardTrips() {
         <div className="flex items-center justify-between">
           <h1 className="text-lg sm:text-xl font-semibold">Control Your Trips</h1>
           <div className="flex items-center gap-2">
-            <Link href="/dashboard/controlTrips/addTrip" className="px-4 py-2 rounded-xl border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-sm font-medium">
+            <Link
+              href="/dashboard/controlTrips/addTrip"
+              className="px-4 py-2 rounded-xl border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-sm font-medium"
+            >
               ADD
             </Link>
-            {/* TODO: delete all handler */}
-            <Link href={'/'}>
-              <button className=" cursor-pointer flex justify-center items-center gap-2 px-4 py-2 rounded-xl border border-yellow-700 bg-yellow-900/30 hover:bg-yellow-900/40 text-sm font-medium">
-                <span> Preview</span>  <MdOutlineRemoveRedEye />
+            {/* Preview button */}
+            <Link href={"/"}>
+              <button className="cursor-pointer flex justify-center items-center gap-2 px-4 py-2 rounded-xl border border-yellow-700 bg-yellow-900/30 hover:bg-yellow-900/40 text-sm font-medium">
+                <span> Preview</span> <MdOutlineRemoveRedEye />
               </button>
             </Link>
           </div>
         </div>
 
-        {/* Loading */}
+        {/* Loading state */}
         {loading && (
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-8 text-center text-zinc-400">
             <div className="loader"></div>
@@ -158,7 +75,7 @@ export default function DashboardTrips() {
           </div>
         )}
 
-        {/* Error */}
+        {/* Error state */}
         {error && (
           <div className="rounded-2xl border border-rose-800 bg-rose-900/40 p-6 text-center">
             <div className="flex flex-col items-center gap-4">
@@ -181,8 +98,8 @@ export default function DashboardTrips() {
           </div>
         )}
 
-        {/* List */}
-        {!loading && !error && trips.map((trip) => (
+        {/* Trip list */}
+        {!loading && !error && trips.length > 0 && trips.map((trip) => (
           <TripCard key={trip?._id} trip={trip} onDelete={handleDelete} />
         ))}
       </main>
@@ -192,31 +109,12 @@ export default function DashboardTrips() {
   );
 }
 
-
-
-// ---------------- bulider components
-
-function Pill({ children, variant = "default", className = "", ...rest }) {
-  const base =
-    "inline-flex items-center gap-1 px-4 py-2 text-xs rounded-full border";
-  const variants = {
-    default: "border-zinc-700 bg-zinc-800 text-zinc-200",
-    success: "border-emerald-700 bg-emerald-900/30 text-emerald-300",
-    danger: "border-rose-700 bg-rose-900/30 text-rose-300",
-    muted: "border-zinc-700 bg-zinc-900/40 text-zinc-400 ",
-  };
-  return (
-    <span className={`${base} ${variants[variant]} ${className}`} {...rest}>
-      {children}
-    </span>
-  );
-}
-
+// Trip Card Component (no changes here)
 function TripCard({ trip, onDelete }) {
   return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 backdrop-blur p-4 sm:p-5 shadow-sm">
       <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr_140px] gap-4 items-center">
-        {/* image */}
+        {/* Image */}
         <div className="overflow-hidden rounded-xl border border-zinc-800 aspect-[16/10] sm:aspect-[3/2]">
           {Array.isArray(trip.images) && trip.images.length > 0 ? (
             <img src={trip.images[0]} alt={trip.name} className="h-full w-full object-cover" />
@@ -225,7 +123,7 @@ function TripCard({ trip, onDelete }) {
           )}
         </div>
 
-        {/* content */}
+        {/* Content */}
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-base sm:text-lg font-semibold text-zinc-100">{trip.name}</h3>
@@ -255,7 +153,7 @@ function TripCard({ trip, onDelete }) {
           </ul>
         </div>
 
-        {/* actions */}
+        {/* Actions */}
         <div className="flex sm:flex-col justify-end sm:justify-center gap-2">
           <button
             className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${trip.isActive
@@ -268,18 +166,35 @@ function TripCard({ trip, onDelete }) {
             {trip.isActive ? "● Is Active" : "○ Inactive"}
           </button>
 
-          <Link href={`/dashboard/controlTrips/${trip._id}`} className=" cursor-pointer px-3 py-1.5 rounded-lg border border-sky-700 bg-sky-900/30 text-sky-200 text-xs font-medium hover:bg-sky-900/40 text-center">
+          <Link href={`/dashboard/controlTrips/${trip._id}`} className="cursor-pointer px-3 py-1.5 rounded-lg border border-sky-700 bg-sky-900/30 text-sky-200 text-xs font-medium hover:bg-sky-900/40 text-center">
             Update
           </Link>
 
           <button
             onClick={() => onDelete(trip._id)}
-            className=" cursor-pointer px-3 py-1.5 rounded-lg border border-rose-700 bg-rose-900/30 text-rose-200 text-xs font-medium hover:bg-rose-900/40"
+            className="cursor-pointer px-3 py-1.5 rounded-lg border border-rose-700 bg-rose-900/30 text-rose-200 text-xs font-medium hover:bg-rose-900/40"
           >
             Delete
           </button>
         </div>
       </div>
     </div>
+  );
+}
+
+// Pill component (no changes here)
+function Pill({ children, variant = "default", className = "", ...rest }) {
+  const base =
+    "inline-flex items-center gap-1 px-4 py-2 text-xs rounded-full border";
+  const variants = {
+    default: "border-zinc-700 bg-zinc-800 text-zinc-200",
+    success: "border-emerald-700 bg-emerald-900/30 text-emerald-300",
+    danger: "border-rose-700 bg-rose-900/30 text-rose-300",
+    muted: "border-zinc-700 bg-zinc-900/40 text-zinc-400 ",
+  };
+  return (
+    <span className={`${base} ${variants[variant]} ${className}`} {...rest}>
+      {children}
+    </span>
   );
 }
