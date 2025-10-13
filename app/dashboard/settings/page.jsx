@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTH } from "@/paths";
 import React from "react";
 
 const API_BASE = AUTH; // ← change if your authRouter is mounted elsewhere
