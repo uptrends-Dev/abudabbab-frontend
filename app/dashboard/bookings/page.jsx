@@ -1,10 +1,9 @@
 "use client";
 
-import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { FaEnvelope, FaWhatsapp } from "react-icons/fa";
-import { exportExsl } from "@/lib/apis/bookingsApi";
-import { getallBooking, getallTrips } from "@/lib/apis/api";
+
+import { exportExsl, getallBooking, getallTrips } from "@/lib/apis/api";
 import { TRIPS_URL } from "@/paths";
 
 

@@ -9,3 +9,4 @@ export const BOOKING = `${BASE}/bookings`
 export const LOGIN = `${BASE}/admin/auth/login`
 export const WHOISME = `${BASE}/admin/auth/me`
 export const AUTH = `${BASE}/admin/auth`
+export const EXPORT = `${BASE}/bookings/export`
