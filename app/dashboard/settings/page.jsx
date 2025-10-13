@@ -119,15 +119,19 @@ export default function UsersPage() {
         if (form.password && form.password.trim().length) {
           payload.password = form.password;
         }
+        try {
 
-        const res = await updateUser(`${API_BASE}/updateuser`, payload);
+          const res = await updateUser(`${API_BASE}/updateuser`, payload);
+          const data = res;
+          setUsers((prev) =>
+            prev.map((u) => (u._id === data.user._id ? { ...u, ...data.user } : u))
+          );
+          setModalOpen(false);
+        } catch (error) {
+          console.error("Error updating user:", error);
+        }
         // if (!res.ok) throw new Error(res?.message || "Failed to update user");
-        const data = res;
         // Replace updated user in list
-        setUsers((prev) =>
-          prev.map((u) => (u._id === data.user._id ? { ...u, ...data.user } : u))
-        );
-        setModalOpen(false);
       }
     } catch (e) {
       setError(e.message || "Request failed");

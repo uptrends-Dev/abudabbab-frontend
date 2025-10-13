@@ -5,7 +5,7 @@ export default function dashboardLayout({ children }) {
   return (
     <ReduxTripsProvider>
       <AdminHeader />
-      <div className="bg-black min-h-screen pt-6">
+      <div className="bg-black min-h-screen">
         {children}
       </div>
     </ReduxTripsProvider>
