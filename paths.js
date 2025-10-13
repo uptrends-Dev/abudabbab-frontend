@@ -7,3 +7,5 @@ export const TRIP_API_ADMIN = `${BASE}/trips/admin`
 export const BOOKING_ADMIN = `${BASE}/bookings/admin`
 export const BOOKING = `${BASE}/bookings`
 export const LOGIN = `${BASE}/admin/auth/login`
+export const WHOISME = `${BASE}/admin/auth/me`
+export const AUTH = `${BASE}/admin/auth`
