@@ -87,6 +87,7 @@ export default function UsersPage() {
     setError("");
     try {
       if (mode === "create") {
+        // Create new user logic (unchanged)
         const payload = {
           username: form.username.trim(),
           email: form.email.trim().toLowerCase(),
@@ -98,13 +99,10 @@ export default function UsersPage() {
           address: form.address,
         };
         const res = await registerUser(`${API_BASE}/register`, payload);
-        // if (!res.ok) throw new Error(res?.message || "Failed to create user");
-
-        // Optimistically add to list (server returns safe user fields)
-        setUsers((prev) => [res.data.user, ...prev]);
+        setUsers((prev) => [res.data.user, ...prev]);  // Update user list with new user
         setModalOpen(false);
       } else {
-        // edit
+        // Edit user logic
         const payload = {
           id: form.id,
           username: form.username.trim(),
@@ -115,26 +113,16 @@ export default function UsersPage() {
           phoneNumber: form.phoneNumber,
           address: form.address,
         };
-        // include password only if user entered something
         if (form.password && form.password.trim().length) {
           payload.password = form.password;
         }
-        try {
+        const res = await updateUser(`${API_BASE}/updateuser`, payload);
 
-          const res = await updateUser(`${API_BASE}/updateuser`, payload);
-          const data = res;
-          // console.log("Update response:", data);
-          // console.log("Update response:", users);
-
-          setUsers((prev) =>
-            prev.map((u) => (u._id === data.data.user._id ? { ...u, ...data.user } : u))
-          );
-          setModalOpen(false);
-        } catch (error) {
-          console.error("Error updating user:", error);
-        }
-        // if (!res.ok) throw new Error(res?.message || "Failed to update user");
-        // Replace updated user in list
+        // Update users in state with the updated user data
+        setUsers((prev) =>
+          prev.map((u) => (u._id === res.data.user._id ? { ...u, ...res.data.user } : u))
+        );
+        setModalOpen(false);
       }
     } catch (e) {
       setError(e.message || "Request failed");
