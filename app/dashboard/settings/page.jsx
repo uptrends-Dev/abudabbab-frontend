@@ -45,6 +45,10 @@ export default function UsersPage() {
     return () => { alive = false; };
   }, []);
 
+  // Separate SUPER_ADMIN users
+  const superAdmins = users.filter((user) => user.role === "SUPER_ADMIN");
+  const otherUsers = users.filter((user) => user.role !== "SUPER_ADMIN");
+
   function openCreate() {
     setMode("create");
     setForm({
@@ -150,6 +154,32 @@ export default function UsersPage() {
 
   return (
     <div className="max-w-6xl mx-auto p-4">
+      {/* Display SUPER_ADMIN in a Card */}
+      {superAdmins.length > 0 && (
+        <div className="flex justify-center mb-4">
+          {superAdmins.map((admin) => (
+            <div
+              key={admin._id}
+              className="bg-zinc-800 p-6 rounded-lg shadow-lg w-full max-w-[350px] flex flex-col items-center justify-center"
+            >
+              <h2 className="text-2xl text-zinc-100 font-semibold text-center">{admin.username}</h2>
+              <p className="text-zinc-400 text-center">{admin.email}</p>
+              <p className="text-zinc-400 text-center">{admin.role}</p>
+              <p className="text-zinc-400 text-center">{admin.bio}</p>
+              <div className="flex gap-2 mt-4 justify-center">
+                <button
+                  onClick={() => openEdit(admin)}
+                  className="px-4 py-2 rounded border border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800"
+                >
+                  Edit
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add User Button */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-lg font-semibold text-zinc-100">Manage Users</h1>
         <button
@@ -160,14 +190,17 @@ export default function UsersPage() {
         </button>
       </div>
 
+      {/* Error message */}
       {error ? (
         <div className="mb-3 text-sm text-red-400">{error}</div>
       ) : null}
 
+      {/* Loading indicator */}
       {loading ? (
         <div className="text-zinc-400">Loading users…</div>
       ) : (
         <div className="overflow-x-auto">
+          {/* Users Table */}
           <table className="w-full text-sm border border-zinc-800 rounded-lg overflow-hidden">
             <thead className="bg-zinc-950">
               <tr className="[&>th]:px-3 [&>th]:py-2 text-left text-zinc-300">
@@ -181,7 +214,7 @@ export default function UsersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800">
-              {users.map((u) => (
+              {otherUsers.map((u) => (
                 <tr key={u._id} className="[&>td]:px-3 [&>td]:py-2 text-zinc-200">
                   <td className="font-medium">{u.username}</td>
                   <td className="text-zinc-400">{u.email}</td>
@@ -209,7 +242,7 @@ export default function UsersPage() {
                   </td>
                 </tr>
               ))}
-              {users.length === 0 && (
+              {otherUsers.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-3 py-6 text-center text-zinc-500">
                     No users found.
@@ -238,7 +271,9 @@ export default function UsersPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3">
+              {/* Form Fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Username */}
                 <div>
                   <label className="block text-xs text-zinc-400 mb-1">Username</label>
                   <input
@@ -248,6 +283,7 @@ export default function UsersPage() {
                     required
                   />
                 </div>
+                {/* Email */}
                 <div>
                   <label className="block text-xs text-zinc-400 mb-1">Email</label>
                   <input
@@ -258,6 +294,7 @@ export default function UsersPage() {
                     required
                   />
                 </div>
+                {/* Password */}
                 <div>
                   <label className="block text-xs text-zinc-400 mb-1">
                     {mode === "create" ? "Password" : "New Password (optional)"}
@@ -270,6 +307,7 @@ export default function UsersPage() {
                     {...(mode === "create" ? { required: true } : {})}
                   />
                 </div>
+                {/* Role */}
                 <div>
                   <label className="block text-xs text-zinc-400 mb-1">Role</label>
                   <select
@@ -282,7 +320,7 @@ export default function UsersPage() {
                     ))}
                   </select>
                 </div>
-
+                {/* Profile Picture URL */}
                 <div className="sm:col-span-2">
                   <label className="block text-xs text-zinc-400 mb-1">Profile Picture URL</label>
                   <input
@@ -291,6 +329,7 @@ export default function UsersPage() {
                     onChange={(e) => setForm((f) => ({ ...f, profilePicture: e.target.value }))}
                   />
                 </div>
+                {/* Bio */}
                 <div className="sm:col-span-2">
                   <label className="block text-xs text-zinc-400 mb-1">Bio</label>
                   <textarea
@@ -300,6 +339,7 @@ export default function UsersPage() {
                     onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))}
                   />
                 </div>
+                {/* Phone */}
                 <div>
                   <label className="block text-xs text-zinc-400 mb-1">Phone</label>
                   <input
@@ -308,6 +348,7 @@ export default function UsersPage() {
                     onChange={(e) => setForm((f) => ({ ...f, phoneNumber: e.target.value }))}
                   />
                 </div>
+                {/* Address */}
                 <div>
                   <label className="block text-xs text-zinc-400 mb-1">Address</label>
                   <input
@@ -318,6 +359,7 @@ export default function UsersPage() {
                 </div>
               </div>
 
+              {/* Form buttons */}
               <div className="flex items-center justify-end gap-2 pt-2">
                 <button
                   type="button"
@@ -339,7 +381,7 @@ export default function UsersPage() {
         </div>
       )}
 
-      {/* Delete confirm */}
+      {/* Delete Confirm Modal */}
       {confirmDelete.open && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-lg border border-zinc-800 bg-zinc-950 p-4">
