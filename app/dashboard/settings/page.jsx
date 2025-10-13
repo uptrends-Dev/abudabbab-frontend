@@ -1,10 +1,11 @@
 "use client";
 
+import { deleteUser, getUsers, registerUser, updateUser } from "@/lib/apis/api";
 import { AUTH } from "@/paths";
 import React from "react";
 
 const API_BASE = AUTH; // ← change if your authRouter is mounted elsewhere
-const ROLES = ["SUPER_ADMIN", "ADMIN", "EMPLOYEE", "GATE"]; // finance not allowed in register per your controller
+const ROLES = ["SUPER_ADMIN", "FINANCE", "ADMIN", "EMPLOYEE", "GATE"]; // finance not allowed in register per your controller
 
 export default function UsersPage() {
   const [users, setUsers] = React.useState([]);
@@ -32,9 +33,8 @@ export default function UsersPage() {
       try {
         setLoading(true);
         setError("");
-        const res = await fetch(`${API_BASE}/getallusers`, { credentials: "include" });
-        if (!res.ok) throw new Error((await res.json())?.message || "Failed to fetch users");
-        const data = await res.json();
+        const data = await getUsers(`${API_BASE}/getallusers`);
+        if (!data) throw new Error("Failed to fetch users");
         if (alive) setUsers(Array.isArray(data.users) ? data.users : []);
       } catch (e) {
         if (alive) setError(e.message || "Error loading users");
@@ -97,17 +97,11 @@ export default function UsersPage() {
           phoneNumber: form.phoneNumber,
           address: form.address,
         };
-        const res = await fetch(`${API_BASE}/register`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(payload),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data?.message || "Failed to create user");
+        const res = await registerUser(`${API_BASE}/register`, payload);
+        // if (!res.ok) throw new Error(res?.message || "Failed to create user");
 
         // Optimistically add to list (server returns safe user fields)
-        setUsers((prev) => [data.user, ...prev]);
+        setUsers((prev) => [res.data.user, ...prev]);
         setModalOpen(false);
       } else {
         // edit
@@ -126,15 +120,9 @@ export default function UsersPage() {
           payload.password = form.password;
         }
 
-        const res = await fetch(`${API_BASE}/updateuser`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(payload),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data?.message || "Failed to update user");
-
+        const res = await updateUser(`${API_BASE}/updateuser`, payload);
+        // if (!res.ok) throw new Error(res?.message || "Failed to update user");
+        const data = res;
         // Replace updated user in list
         setUsers((prev) =>
           prev.map((u) => (u._id === data.user._id ? { ...u, ...data.user } : u))
@@ -153,14 +141,9 @@ export default function UsersPage() {
     setSubmitting(true);
     setError("");
     try {
-      const res = await fetch(`${API_BASE}/deleteuser`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ id }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.message || "Failed to delete user");
+      await deleteUser(`${API_BASE}/deleteuser/${id}`);
+      // if (!res.ok) throw new Error(res?.message || "Failed to delete user");
+      // Remove from list
       setUsers((prev) => prev.filter((u) => u._id !== id));
       setConfirmDelete({ open: false, id: "", username: "" });
     } catch (e) {
