@@ -94,11 +94,10 @@ export default function UsersPage() {
     setError("");
     try {
       if (mode === "create") {
-        // Create new user logic (unchanged)
         const payload = {
           username: form.username.trim(),
           email: form.email.trim().toLowerCase(),
-          password: form.password, // required on register
+          password: form.password,
           role: form.role,
           profilePicture: form.profilePicture,
           bio: form.bio,
@@ -106,7 +105,12 @@ export default function UsersPage() {
           address: form.address,
         };
         const res = await registerUser(`${API_BASE}/register`, payload);
-        setUsers((prev) => [res.data.user, ...prev]);  // Update user list with new user
+
+        // Instead of updating the state directly, refetch all users
+        const data = await getUsers(`${API_BASE}/getallusers`);
+        if (!data) throw new Error("Failed to fetch users");
+        setUsers(Array.isArray(data.users) ? data.users : []);
+
         setModalOpen(false);
       } else {
         // Edit user logic
@@ -125,12 +129,11 @@ export default function UsersPage() {
         }
         const res = await updateUser(`${API_BASE}/updateuser`, payload);
 
-        // Update users in state with the updated user data
-        setUsers((prev) =>
-          prev.map((u) => (u._id === res.data.user._id ? { ...u, ...res.data.user } : u))
-        );
+        // Refetch users after update to sync frontend and backend data
+        const data = await getUsers(`${API_BASE}/getallusers`);
+        if (!data) throw new Error("Failed to fetch users");
+        setUsers(Array.isArray(data.users) ? data.users : []);
         setModalOpen(false);
-        // router.refresh(); // Refresh to update any server-side rendered data
       }
     } catch (e) {
       setError(e.message || "Request failed");
@@ -145,9 +148,12 @@ export default function UsersPage() {
     setError("");
     try {
       await deleteUser(`${API_BASE}/deleteuser`, id);
-      // if (!res.ok) throw new Error(res?.message || "Failed to delete user");
-      // Remove from list
-      setUsers((prev) => prev.filter((u) => u._id !== id));
+
+      // Refetch users after delete to sync data
+      const data = await getUsers(`${API_BASE}/getallusers`);
+      if (!data) throw new Error("Failed to fetch users");
+      setUsers(Array.isArray(data.users) ? data.users : []);
+
       setConfirmDelete({ open: false, id: "", username: "" });
     } catch (e) {
       setError(e.message || "Delete failed");
