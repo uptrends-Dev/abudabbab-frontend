@@ -156,15 +156,48 @@ export default function BookingsPage() {
   };
 
 
+  const exportEx = async (allBookings) => {
+  try {
+    // Limit the number of bookings to 1000
+    const limitedBookings = allBookings.slice(0, 1000); 
+    
+    // Call the exportExsl function with the limited data
+    const data = await exportExsl(limitedBookings);
 
+    // Create a Blob from the response data
+    const blob = new Blob([data.data], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
 
+    // Create a URL for the Blob
+    const url = URL.createObjectURL(blob);
+
+    // Create a link element to trigger the file download
+    const a = document.createElement("a");
+    a.href = url;
+
+    // Set the file name for download (if provided by the server)
+    a.download =
+      data.headers["content-disposition"]?.match(/filename="(.+)"/)?.[1] ??
+      "bookings.xlsx"; // Default to "bookings.xlsx" if no filename in headers
+
+    // Trigger the download by clicking the link
+    a.click();
+
+    // Clean up by revoking the object URL
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    // Handle errors
+    console.error("Export error:", error);
+  }
+};
 
   return (
     <div className="min-h-screen bg-neutral-900 text-neutral-200">
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="sm:flex gap-4  items-center">
           <button
-            onClick={() => exportExsl(allBookings)}
+            onClick={() => exportEx(allBookings)}
             className=" cursor-pointer rounded-xl border border-neutral-800 bg-blue-800/90 font-bold px-3 py-2 text-sm text-neutral-300 hover:bg-blue-800/75 transition duration-200"
           >
             Export Excel
@@ -1056,33 +1089,33 @@ export default function BookingsPage() {
 
 // ------------------------- bulider functions
 
-function tripFilter() {
-  trips.map((e) => {
-    console.log(e.name);
-    return ` <option value="${e?.name}">${e?.name}</option>`;
-  });
-}
+// function tripFilter() {
+//   trips.map((e) => {
+//     console.log(e.name);
+//     return ` <option value="${e?.name}">${e?.name}</option>`;
+//   });
+// }
 
-const ExportToExcel = async () => {
-  try {
-    const arrayBuffer = await exportExsl(allBookings);
-    const blob = new Blob([arrayBuffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    const url = URL.createObjectURL(blob);
+// const ExportToExcel = async () => {
+//   try {
+//     const arrayBuffer = await exportExsl(allBookings);
+//     const blob = new Blob([arrayBuffer], {
+//       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+//     });
+//     const url = URL.createObjectURL(blob);
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download =
-      res.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1] ??
-      "bookings.xlsx";
-    a.click();
+//     const a = document.createElement("a");
+//     a.href = url;
+//     a.download =
+//       res.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1] ??
+//       "bookings.xlsx";
+//     a.click();
 
-    URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error("Export error:", error);
-  }
-};
+//     URL.revokeObjectURL(url);
+//   } catch (error) {
+//     console.error("Export error:", error);
+//   }
+// };
 
 
 
