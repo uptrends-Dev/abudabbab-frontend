@@ -120,7 +120,7 @@ export default function UsersPage() {
           payload.password = form.password;
         }
 
-        const res = await updateUser(`${API_BASE}/updateuser/${form.id}`, payload);
+        const res = await updateUser(`${API_BASE}/updateuser`, payload);
         // if (!res.ok) throw new Error(res?.message || "Failed to update user");
         const data = res;
         // Replace updated user in list
