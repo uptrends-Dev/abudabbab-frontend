@@ -5,7 +5,7 @@ import { AUTH } from "@/paths";
 import React from "react";
 
 const API_BASE = AUTH; // ← change if your authRouter is mounted elsewhere
-const ROLES = ["SUPER_ADMIN", "FINANCE", "ADMIN", "EMPLOYEE", "GATE"]; // finance not allowed in register per your controller
+const ROLES = [ "FINANCE", "ADMIN", "EMPLOYEE", "GATE"]; // finance not allowed in register per your controller
 
 export default function UsersPage() {
   const [users, setUsers] = React.useState([]);
@@ -47,8 +47,12 @@ export default function UsersPage() {
     return () => { alive = false; };
   }, []);
 
+  // Separate SUPER_ADMIN users
+  const superAdmins = users.filter((user) => user.role === "SUPER_ADMIN");
+  const otherUsers = users.filter((user) => user.role !== "SUPER_ADMIN");
+
   // Filter users based on search and role
-  const filteredUsers = users.filter((user) => {
+  const filteredUsers = otherUsers.filter((user) => {
     const usernameMatch = user.username.toLowerCase().includes(searchQuery.toLowerCase());
     const emailMatch = user.email.toLowerCase().includes(searchQuery.toLowerCase());
     const roleMatch = roleFilter ? user.role === roleFilter : true;
@@ -168,6 +172,31 @@ export default function UsersPage() {
 
   return (
     <div className="max-w-6xl mx-auto p-4">
+      {/* Display SUPER_ADMIN in a Card */}
+      {superAdmins.length > 0 && (
+        <div className="flex justify-center mb-4">
+          {superAdmins.map((admin) => (
+            <div
+              key={admin._id}
+              className="bg-zinc-800 p-6 rounded-lg shadow-lg w-full max-w-[350px] flex flex-col items-center justify-center"
+            >
+              <h2 className="text-2xl text-zinc-100 font-semibold text-center">{admin.username}</h2>
+              <p className="text-zinc-400 text-center">{admin.email}</p>
+              <p className="text-zinc-400 text-center">{admin.role}</p>
+              <p className="text-zinc-400 text-center">{admin.bio}</p>
+              <div className="flex gap-2 mt-4 justify-center">
+                {/* <button
+                  onClick={() => openEdit(admin)}
+                  className="px-4 py-2 rounded border border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800"
+                >
+                  Edit
+                </button> */}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Search and Role Filter */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-lg font-semibold text-zinc-100">Manage Users</h1>
