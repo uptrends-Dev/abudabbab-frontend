@@ -5,7 +5,7 @@ import { AUTH } from "@/paths";
 import React from "react";
 
 const API_BASE = AUTH; // ← change if your authRouter is mounted elsewhere
-const ROLES = [ "FINANCE", "ADMIN", "EMPLOYEE", "GATE"]; // finance not allowed in register per your controller
+const ROLES = ["FINANCE", "ADMIN", "EMPLOYEE", "GATE"]; // finance not allowed in register per your controller
 
 export default function UsersPage() {
   const [users, setUsers] = React.useState([]);
@@ -201,6 +201,12 @@ export default function UsersPage() {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-lg font-semibold text-zinc-100">Manage Users</h1>
         <div className="flex gap-4">
+        <button
+          onClick={() => openCreate()}
+          className="px-2 py-1 rounded border text-white border-zinc-700 hover:bg-zinc-900"
+        >
+          add
+        </button>
           <input
             type="text"
             className="px-3 py-2 rounded border border-zinc-700 bg-zinc-900 text-zinc-100"
