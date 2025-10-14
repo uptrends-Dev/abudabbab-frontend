@@ -4,14 +4,18 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
-import axios from "axios";
-import { setBookingDetails } from "@/app/store/bookingSlice";
+import axios, { get } from "axios";
+// import { setBookingDetails } from "@/app/store/bookingSlice";
+import { getTrip } from "@/lib/apis/api";
+import { setBookingData } from "@/app/store/slice/checkoutSlice";
 
 export default function Page() {
+  const today = new Date().toISOString().split('T')[0];
   const { id } = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
   const [currancy, setCurrancy] = useState("");
+
   useEffect(() => {
     async function fetchCurrancyEx() {
       const response = await axios.get(
@@ -23,7 +27,7 @@ export default function Page() {
   }, []);
   // console.log(currancy);
   const tripsInStore = useSelector((s) => s.trips.trips);
-  const booking = useSelector((s) => s.bookings);
+  // const booking = useSelector((s) => s.bookings);
 
   const [trip, setTrip] = useState(
     () => tripsInStore.find((t) => String(t._id) === String(id)) || null
@@ -42,28 +46,25 @@ export default function Page() {
       return;
     }
 
+    // let mounted = true;
+    // (async () => {
+    //   try {
+    //     setLoading(true);
+    //     const data = await getTrip(id);
+    //     console.log(data);
+    //     if (!mounted) return;
+    //     setTrip(data);
+    //   } catch (e) {
+    //     if (!mounted) return;
+    //     setErr(e?.message || "Failed to load trip");
+    //   } finally {
+    //     if (mounted) setLoading(false);
+    //   }
+    // })();
 
-    let mounted = true;
-    (async () => {
-      try {
-        setLoading(true);
-        const BASE =
-          process.env.NEXT_PUBLIC_API_URL ||
-          "https://abudabbab-backend.vercel.app/api";
-        const res = await axios.get(`${BASE}/trips/${id}`);
-        if (!mounted) return;
-        setTrip(res.data.data);
-      } catch (e) {
-        if (!mounted) return;
-        setErr(e?.message || "Failed to load trip");
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
+    // return () => {
+    //   mounted = false;
+    // };
   }, [id, tripsInStore]);
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm({
@@ -91,24 +92,33 @@ export default function Page() {
 
   const onSubmit = (data) => {
     if (!trip) return;
-    dispatch(
-      setBookingDetails({
-        adult: Number(data.adult),
-        child: Number(data.child),
-        transfer: !!data.transfer,
-        payment: !!data.payment,
-        bookingDate: data.date, // normalized
-        totalPrice: { egp: totalEgp, euro: totalEuro },
-        tripId: trip._id,
-        trip, // keep trip for checkout summary
-      })
-    );
+    // dispatch(
+    //   setBookingDetails({
+    //     adult: Number(data.adult),
+    //     child: Number(data.child),
+    //     transfer: !!data.transfer,
+    //     payment: !!data.payment,
+    //     bookingDate: data.date, // normalized
+    //     totalPrice: { egp: totalEgp, euro: totalEuro },
+    //     tripId: trip._id,
+    //     trip, // keep trip for checkout summary
+    //   })
+    // );
+    dispatch(setBookingData({
+      adult: Number(data.adult),
+      child: Number(data.child),
+      transfer: !!data.transfer,
+      payment: !!data.payment,
+      bookingDate: data.date, // normalized
+      totalPrice: { egp: totalEgp, euro: totalEuro },
+      tripId: trip._id,
+    }));
     router.push("/trips/checkOut");
   };
 
-  useEffect(() => {
-    console.log("bookings updated:", booking);
-  }, [booking]);
+  // useEffect(() => {
+  //   console.log("bookings updated:", booking);
+  // }, [booking]);
 
   if (loading) return <div className="p-6 loader"></div>;
   if (err) return <div className="p-6 text-red-600">Error: {err}</div>;
@@ -262,6 +272,7 @@ export default function Page() {
                           {...register("date", { required: true })}
                           type="date"
                           id="date"
+                          min={today}
                           className="w-full h-[44px] px-3 rounded-2xl bg-black/30 text-white border border-blue-200/20 focus:outline-none focus:ring-2 focus:ring-blue-400 [color-scheme:dark]"
                         />
                       </div>
@@ -314,7 +325,7 @@ export default function Page() {
 
                       {/* Totals */}
                       <div className="flex items-center justify-between gap-3 rounded-3xl bg-white/5 backdrop-blur ring-1 ring-blue-300/30 px-4 py-3">
-                        Total: {totalEuro} € / {totalEgp} EGP
+                        {`Total: ${totalEuro} € / ${totalEgp} EGP`}
                       </div>
 
                       <button

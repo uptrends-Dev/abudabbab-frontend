@@ -1,13 +1,13 @@
 import "./globals.css";
-import ReduxTripsProvider from "@/components/Provides/reduxTripsProvider";
+import { Providers } from "@/components/Provides/reduxProvider";
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <ReduxTripsProvider>
+        <Providers>
           {children}
-        </ReduxTripsProvider>
+        </Providers>
       </body>
     </html>
   );

@@ -1,18 +1,20 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+// import { createAsyncThunk } from "@reduxjs/toolkit";
+// import axios from "axios";
+// import { checkOut } from "./api";
+
 import { checkOut } from "./api";
 
-// GET all bookings
-export const getAllBookings = createAsyncThunk(
-  "bookings/getAllBookings",
-  async (url) => {
-    const response = await axios.get(url);
-    // console.log(response.data)
-    return response;
-  }
-);
+// // GET all bookings
+// export const getAllBookings = createAsyncThunk(
+//   "bookings/getAllBookings",
+//   async (url) => {
+//     const response = await axios.get(url);
+//     // console.log(response.data)
+//     return response;
+//   }
+// );
 
-// POST booking
+// // POST booking
 export const postBooking = createAsyncThunk(
   "bookings/postBooking",
   async ({ url }, { getState, rejectWithValue }) => {
@@ -62,31 +64,31 @@ export const postBooking = createAsyncThunk(
   }
 );
 
-// GET advancedTripInfo
-export const getAdvancedTripInfo = createAsyncThunk(
-  "bookings/getAdvancedTripInfo",
-  async (url, { rejectWithValue }) => {
-    try {
-      const res = await axios.get(url);
-      return res.data.data;
-    } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message);
-    }
-  }
-);
+// // GET advancedTripInfo
+// export const getAdvancedTripInfo = createAsyncThunk(
+//   "bookings/getAdvancedTripInfo",
+//   async (url, { rejectWithValue }) => {
+//     try {
+//       const res = await axios.get(url);
+//       return res.data.data;
+//     } catch (err) {
+//       return rejectWithValue(err.response?.data?.message || err.message);
+//     }
+//   }
+// );
 
-// GET getTotalBookingsAndRevenue
-export const getTotalBookingsAndRevenue = createAsyncThunk(
-  "bookings/getTotalBookingsAndRevenue",
-  async (url, { rejectWithValue }) => {
-    try {
-      const res = await axios.get(url);
-      return res.data; // { totalBookings, totalRevenue, ... }
-    } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message);
-    }
-  }
-);
+// // GET getTotalBookingsAndRevenue
+// export const getTotalBookingsAndRevenue = createAsyncThunk(
+//   "bookings/getTotalBookingsAndRevenue",
+//   async (url, { rejectWithValue }) => {
+//     try {
+//       const res = await axios.get(url);
+//       return res.data; // { totalBookings, totalRevenue, ... }
+//     } catch (err) {
+//       return rejectWithValue(err.response?.data?.message || err.message);
+//     }
+//   }
+// );
 
 
 export async function exportExsl(allBookings) {
