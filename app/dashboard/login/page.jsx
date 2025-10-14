@@ -21,14 +21,10 @@ const page = () => {
     setLoading(true);
     setError(null);
     try {
-      // either let the server action redirect...
-      // await login({ email, password, redirectTo: "/dashboard" });
-
-      // ...or, if you pass redirectTo: undefined above,
-      // you can do client-side navigation here:
-      const { succeeded } = await login({ email, password });
+      const { succeeded, redirectTo } = await login({ email, password });
+      
       if (succeeded) {
-        router.replace(next);
+        router.replace(`${next}${redirectTo}` || next);
         router.refresh();
       }
     } catch (err) {
