@@ -85,36 +85,81 @@ export default function TripsSection() {
           viewport={{ once: true, amount: 0.2 }}
         >
           {trips.map((t, i) => (
-            <div key={i} className="max-w-sm  rounded-[12px]  overflow-hidden shadow-lg bg-white">
+            <div
+              key={i}
+              className="
+    group relative max-w-sm rounded-[12px] overflow-hidden bg-white shadow-lg ring-1 ring-slate-200/70
+    transition-all duration-500 motion-reduce:transition-none
+    hover:-translate-y-1 hover:shadow-2xl hover:ring-slate-300
+    will-change-transform
+    before:content-[''] before:absolute before:inset-0 before:-z-10 before:rounded-[14px]
+    before:bg-gradient-to-br before:from-orange-400/0 before:via-orange-400/15 before:to-fuchsia-500/0
+    before:opacity-0 group-hover:before:opacity-100 before:transition-opacity before:duration-500
+    
+  "
+            >
               <div className="relative w-full flex justify-center items-center">
-
                 <Image
-                  src={`${t.images[0]}`} // Replace with the correct image URL
+                  src={`${t.images[0]}`}
                   alt="Moonstar Villa"
-                  className="w-[90%] h-64 object-cover m-3 rounded-xl shadow-2xl shadow-black/20"
+                  className="
+        w-[90%] h-64 object-cover m-3 rounded-xl shadow-2xl shadow-black/20
+        transition-transform duration-700 ease-out motion-reduce:transition-none
+        group-hover:scale-[1.04] group-hover:rotate-[.75deg]
+        will-change-transform
+      "
                   width={400}
                   height={256}
                   priority={true}
                 />
-                <div className="absolute m-3 left-3 top-2 flex items-center gap-2">
+                <div
+                  className="
+        absolute m-3 left-3 top-2 flex items-center gap-2
+        transition-all duration-500 motion-reduce:transition-none
+        group-hover:-translate-y-0.5 group-hover:drop-shadow
+      "
+                >
                   <span className="rounded-lg bg-white/90 px-3 py-1 text-[11px] font-medium text-slate-800 ring-1 ring-slate-200 backdrop-blur">
                     {t.tripTime.from} – {t.tripTime.to}
                   </span>
                 </div>
               </div>
+
               <div className="p-3">
-                <h2 className="text-[17px] font-semibold text-gray-800 text-left">{t.name}</h2>
+                <h2 className="text-[17px] font-semibold text-gray-800 text-left transition-colors duration-300">
+                  {t.name}
+                </h2>
+
                 <div className="flex items-center mt-2">
                   <span className="text-yellow-500 text-xs">★★★★★</span>
                   <span className="ml-2 text-xs text-gray-500">(650+ Ratings)</span>
                 </div>
-                {/* <p className="mt-4 text-gray-600">
-                  A private seaside retreat with spacious rooms, a pool, lush gardens, modern amenities, and stunning views — ideal for a relaxing getaway.
-                </p> */}
+
+                {/* <p className="mt-4 text-gray-600"> ... </p> */}
+
                 <div className="flex justify-end items-center mt-4 gap-2">
-                  <span className="text-xl font-semibold text-gray-800">${t.prices.adult.euro}</span>
+                  <span
+                    className="
+          text-xl font-semibold text-gray-800 transition-all duration-300
+          group-hover:-translate-y-0.5 group-hover:text-gray-900 
+        "
+                  >
+                    ${t.prices.adult.euro}
+                  </span>
                   <Link href={`/trips/${t._id}`}>
-                    <button className="bg-orange-500 text-white py-2 px-4 rounded-[10px]">
+                    <button
+                      className="
+            relative bg-orange-500 text-white py-2 px-4 rounded-[10px]
+            transition-all duration-300 ease-out motion-reduce:transition-none
+            hover:bg-orange-600 active:scale-95 focus-visible:outline-none
+            focus-visible:ring-2 focus-visible:ring-orange-400/70
+            shadow-md hover:shadow-lg
+            overflow-hidden
+            after:content-[''] after:absolute after:inset-0
+            after:translate-x-[-120%] group-hover:after:translate-x-[120%]
+            after:bg-white/25 after:transition-transform after:duration-700 cursor-pointer
+          "
+                    >
                       Book Now
                     </button>
                   </Link>
