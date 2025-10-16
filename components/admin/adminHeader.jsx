@@ -35,15 +35,17 @@ function tabsForRole(role) {
 }
 
 const AdminHeader = () => {
-  const pathname = usePathname();
-  const router = useRouter();
-
   // Hide header on login page
+  const pathname = usePathname();
   if (pathname === "/dashboard/login") return null;
 
+  const router = useRouter();
+
+  
   const [role, setRole] = React.useState(null);
   const [username, setUsername] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
+  
 
   async function onLogout() {
     try {
@@ -78,6 +80,7 @@ const AdminHeader = () => {
   if (loading || !role) return null;
 
   const visibleTabs = tabsForRole(role);
+  
 
   return (
     <header className="sticky top-0 z-30 border-b border-zinc-800 bg-zinc-950/95 backdrop-blur">

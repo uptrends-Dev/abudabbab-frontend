@@ -157,7 +157,7 @@ function InlineAlert({ message }) {
     <div
       role="alert"
       aria-live="assertive"
-      className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+      className="rounded-lg bg-red-400 border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
     >
       {message}
     </div>
