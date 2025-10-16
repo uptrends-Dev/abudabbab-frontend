@@ -17,6 +17,7 @@ import { BOOKING } from "@/paths";
 
 import { useRouter } from "next/navigation";
 import { checkOut } from "@/lib/apis/api";
+import { clearState } from "@/app/store/slice/checkoutSlice";
 
 export default function CheckoutSection() {
   const router = useRouter();
@@ -68,7 +69,7 @@ export default function CheckoutSection() {
       console.log("Booking response:", res);
       alert("Booking created successfully!");
       reset();
-      // dispatch(clearBookingState());
+      dispatch(clearState);
       router.push("/trips");
       router.refresh();
     } catch (error) {
@@ -91,7 +92,7 @@ export default function CheckoutSection() {
     //       : `Booking created ✅\n${JSON.stringify(created)}`
     //   );
     //   reset();
-      
+
     // } catch (e) {
     //   alert(
     //     `Failed to create booking:\n${typeof e === "string" ? e : JSON.stringify(e)}`
@@ -298,7 +299,9 @@ export default function CheckoutSection() {
               </div>
             </div>
             <Link href={"/trips"}>
-              <button className="flex justify-center items-center cursor-pointer w-full sm:w-auto rounded-full bg-orange-600 px-6 py-3 font-semibold text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60">
+              <button
+                onClick={() => dispatch(clearState())}
+                className="flex justify-center items-center cursor-pointer w-full sm:w-auto rounded-full bg-orange-600 px-6 py-3 font-semibold text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60">
                 <div>Return To Trips</div> <IoIosArrowForward />
               </button>
             </Link>

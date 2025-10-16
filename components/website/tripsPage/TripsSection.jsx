@@ -30,12 +30,12 @@ export default function TripsSection() {
 
   useEffect(() => {
     // طلب البيانات من الـ API عند تحميل المكون
-    dispatch(fetchTripsData("https://abudabbab-backend.vercel.app/api/trips"));
+    dispatch(fetchTripsData());
     console.log("Fetching trips data...", trips);
-  }, [dispatch]);
+  }, []);
 
   if (loading) return <div className="loader"></div>;
-  if (error) return <div>Error: {error}</div>;
+  // if (error) return <div>Error: {error}</div>;
 
   return (
     <section id="trips" className="bg-main py-16 overflow-hidden min-h-screen">

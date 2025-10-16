@@ -8,6 +8,7 @@ const initialState = {
   bookingDate: '',
   totalPrice: { egp: 0, euro: 0 },
   tripId: '',
+  bookingDetails: false,
 }
 
 const bookingSlice = createSlice({
@@ -22,6 +23,7 @@ const bookingSlice = createSlice({
       state.bookingDate = action.payload.bookingDate
       state.totalPrice = action.payload.totalPrice
       state.tripId = action.payload.tripId
+      state.bookingDetails = true
     },
     updateTotalPrice: (state, action) => {
       state.totalPrice = action.payload
@@ -29,9 +31,19 @@ const bookingSlice = createSlice({
     updateBookingDate: (state, action) => {
       state.bookingDate = action.payload
     },
+    clearState: (state) => {
+      state.adult = 0
+      state.child = 0
+      state.transfer = false
+      state.payment = false
+      state.bookingDate = ''
+      state.totalPrice = { egp: 0, euro: 0 }
+      state.tripId = ''
+      state.bookingDetails = false
+    }
   },
 })
 
-export const { setBookingData, updateTotalPrice, updateBookingDate } = bookingSlice.actions
+export const { setBookingData, updateTotalPrice, updateBookingDate, clearState } = bookingSlice.actions
 
 export default bookingSlice.reducer
