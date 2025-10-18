@@ -289,11 +289,11 @@ export default function Page() {
                           htmlFor="transfer"
                           className="text-[15px] font-bold text-white"
                         >
-                          Required transfer
+                          {`Required transfer (optionail)`}
                         </label>
                       </div>
                       {/* payment */}
-                      <div className="flex items-center gap-3 px-2 py-1 rounded-3xl">
+                      {/* <div className="flex items-center gap-3 px-2 py-1 rounded-3xl">
                         <input
                           {...register("payment")}
                           type="checkbox"
@@ -306,9 +306,9 @@ export default function Page() {
                         >
                           Payment Completed
                         </label>
-                      </div>
+                      </div> */}
                       {/* check in */}
-                      <div className="flex items-center gap-3 px-2 py-1 rounded-3xl">
+                      {/* <div className="flex items-center gap-3 px-2 py-1 rounded-3xl">
                         <input
                           {...register("checkIn")}
                           type="checkbox"
@@ -321,7 +321,7 @@ export default function Page() {
                         >
                           Check In
                         </label>
-                      </div>
+                      </div> */}
 
                       {/* Totals */}
                       <div className="flex items-center justify-between gap-3 rounded-3xl bg-white/5 backdrop-blur ring-1 ring-blue-300/30 px-4 py-3">

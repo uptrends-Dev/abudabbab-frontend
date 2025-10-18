@@ -1,27 +1,16 @@
 "use client";
 
 import { CldUploadWidget } from "next-cloudinary";
-import { postTrip } from "../../../../lib/apis/tripsApi";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
-
-import { Field, PriceGroup, Section, inputCls } from "@/lib/helpers/helpers";
 import { posttrip } from "@/lib/apis/api";
 import { TRIP_API_ADMIN } from "@/paths";
 
 
+
 export default function AddTripPageRHF() {
-
-
-  const {
-    register,
-    control,
-    handleSubmit,
-    reset,
-    watch,
-    formState: { errors, isSubmitting },
-  } = useForm({
+  const { register, control, handleSubmit, reset, watch, formState: { errors, isSubmitting } } = useForm({
     mode: "onBlur",
     defaultValues: {
       name: "",
@@ -37,24 +26,12 @@ export default function AddTripPageRHF() {
     },
   });
 
-  const {
-    fields: imageFields,
-    append: appendImage,
-    remove: removeImage,
-    move: moveImage,
-  } = useFieldArray({ control, name: "images" });
-
-  const {
-    fields: featureFields,
-    append: appendFeature,
-    remove: removeFeature,
-    move: moveFeature,
-  } = useFieldArray({ control, name: "features" });
+  const { fields: imageFields, append: appendImage, remove: removeImage, move: moveImage } = useFieldArray({ control, name: "images" });
+  const { fields: featureFields, append: appendFeature, remove: removeFeature, move: moveFeature } = useFieldArray({ control, name: "features" });
 
   const imagesWatch = watch("images");
 
   const onSubmit = async (data) => {
-    // enforce images length 1..5 and map to strings
     const images = (data.images || [])
       .map((i) => (i?.url || "").trim())
       .filter(Boolean)
@@ -91,11 +68,7 @@ export default function AddTripPageRHF() {
     };
 
     try {
-      await posttrip({
-        url: TRIP_API_ADMIN,
-        tripData: payload,
-      })
-
+      await posttrip({ url: TRIP_API_ADMIN, tripData: payload });
       console.log("SUBMIT ►", payload);
       alert("Trip created ✅");
       reset();
@@ -103,9 +76,6 @@ export default function AddTripPageRHF() {
       console.error(err);
       alert(err?.message || "Failed to create trip");
     }
-    // console.log("SUBMIT ►", payload);
-    // alert("Trip created ✅");
-    // reset();
   };
 
   return (
@@ -121,11 +91,8 @@ export default function AddTripPageRHF() {
             >
               Reset
             </button>
-            <Link href={"/dashboard/controlTrips"}>
-              <button
-                type="button"
-                className="cursor-pointer px-4 py-2 rounded-xl border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-sm"
-              >
+            <Link href="/dashboard/controlTrips">
+              <button type="button" className="cursor-pointer px-4 py-2 rounded-xl border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-sm">
                 Back To Trips
               </button>
             </Link>
@@ -139,21 +106,15 @@ export default function AddTripPageRHF() {
               <input
                 className={inputCls(errors?.name)}
                 placeholder="Alexandria Day Trip"
-                {...register("name", {
-                  required: "Required",
-                  minLength: { value: 2, message: "Too short" },
-                })}
+                {...register("name", { required: "Required", minLength: { value: 2, message: "Too short" } })}
               />
             </Field>
 
             <Field label="Description" error={errors?.description?.message}>
               <textarea
-                className={inputCls(errors?.description) + " min-h-[120px]"}
+                className={inputCls(errors?.description, " min-h-[120px]")}
                 placeholder="Overview, highlights, what to expect…"
-                {...register("description", {
-                  required: "Required",
-                  minLength: { value: 10, message: "Please add more details" },
-                })}
+                {...register("description", { required: "Required", minLength: { value: 10, message: "Please add more details" } })}
               />
             </Field>
           </Section>
@@ -171,27 +132,12 @@ export default function AddTripPageRHF() {
                           src={url}
                           alt={`img-${i}`}
                           className="h-full w-full object-cover"
-                          onError={(e) =>
-                            (e.currentTarget.style.opacity = "0.25")
-                          }
+                          onError={(e) => (e.currentTarget.style.opacity = "0.25")}
                         />
                       ) : (
-                        <span className="text-[10px] text-zinc-500">
-                          preview
-                        </span>
+                        <span className="text-[10px] text-zinc-500">preview</span>
                       )}
                     </div>
-
-                    {/* <input
-                      className={inputCls(
-                        errors?.images?.[i]?.url,
-                        "flex-1 min-w-0"
-                      )}
-                      //   type="file"
-                      {...register(`images.${i}.url`, {
-                        required: "URL required",
-                      })}
-                    /> */}
 
                     <Controller
                       control={control}
@@ -204,16 +150,13 @@ export default function AddTripPageRHF() {
                             value={value || ""}
                             onChange={onChange}
                             onBlur={onBlur}
-                            className={inputCls(
-                              errors?.images?.[i]?.url,
-                              "flex-1 min-w-0"
-                            )}
+                            className={inputCls(errors?.images?.[i]?.url, "flex-1 min-w-0")}
                             placeholder="Image URL"
                           />
                           <CldUploadWidget
                             uploadPreset="image_abodbab"
                             options={{
-                              maxFileSize: 2000000, // 2MB
+                              maxFileSize: 2000000,
                               sources: ["local", "camera"],
                               styles: {
                                 palette: {
@@ -236,11 +179,7 @@ export default function AddTripPageRHF() {
                             }}
                             onSuccess={(result) => {
                               const info = result?.info;
-                              const url =
-                                (info &&
-                                  typeof info === "object" &&
-                                  (info.secure_url || info.url)) ||
-                                "";
+                              const url = info && typeof info === "object" && (info.secure_url || info.url);
                               if (url) onChange(url);
                             }}
                           >
@@ -259,38 +198,16 @@ export default function AddTripPageRHF() {
                     />
 
                     <div className="flex gap-1">
-                      <button
-                        type="button"
-                        title="Move up"
-                        onClick={() => moveImage(i, i - 1)}
-                        className="px-2 py-1 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-xs"
-                      >
-                        ↑
-                      </button>
-                      <button
-                        type="button"
-                        title="Move down"
-                        onClick={() => moveImage(i, i + 1)}
-                        className="px-2 py-1 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-xs"
-                      >
-                        ↓
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => removeImage(i)}
-                        className="px-2 py-1 rounded-lg border border-rose-700 bg-rose-900/30 hover:bg-rose-900/40 text-xs"
-                      >
-                        Remove
-                      </button>
+                      <button type="button" title="Move up" onClick={() => moveImage(i, i - 1)} className="px-2 py-1 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-xs">↑</button>
+                      <button type="button" title="Move down" onClick={() => moveImage(i, i + 1)} className="px-2 py-1 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-xs">↓</button>
+                      <button type="button" onClick={() => removeImage(i)} className="px-2 py-1 rounded-lg border border-rose-700 bg-rose-900/30 hover:bg-rose-900/40 text-xs">Remove</button>
                     </div>
                   </div>
                 );
               })}
 
               <div className="flex justify-between">
-                <p className="text-xs text-zinc-500">
-                  First image will be used as the cover. (Max 5)
-                </p>
+                <p className="text-xs text-zinc-500">First image will be used as the cover. (Max 5)</p>
                 <button
                   type="button"
                   onClick={() => {
@@ -308,68 +225,31 @@ export default function AddTripPageRHF() {
             </div>
           </Section>
 
-
-
-
-
           {/* Features */}
           <Section title="Features">
             <div className="space-y-3">
               {featureFields.map((row, i) => (
-                <div
-                  key={row.id}
-                  className="grid sm:grid-cols-[220px_1fr_auto] gap-2"
-                >
+                <div key={row.id} className="grid sm:grid-cols-[220px_1fr_auto] gap-2">
                   <input
                     className={inputCls(errors?.features?.[i]?.title)}
                     placeholder="Feature title"
-                    {...register(`features.${i}.title`, {
-                      required: "Required",
-                      minLength: { value: 2, message: "Too short" },
-                    })}
+                    {...register(`features.${i}.title`, { required: "Required", minLength: { value: 2, message: "Too short" } })}
                   />
                   <input
                     className={inputCls(errors?.features?.[i]?.subtitle)}
                     placeholder="Short explanation"
-                    {...register(`features.${i}.subtitle`, {
-                      required: "Required",
-                      minLength: { value: 2, message: "Too short" },
-                    })}
+                    {...register(`features.${i}.subtitle`, { required: "Required", minLength: { value: 2, message: "Too short" } })}
                   />
                   <div className="flex gap-1">
-                    <button
-                      type="button"
-                      title="Move up"
-                      onClick={() => moveFeature(i, i - 1)}
-                      className="px-2 py-1 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-xs"
-                    >
-                      ↑
-                    </button>
-                    <button
-                      type="button"
-                      title="Move down"
-                      onClick={() => moveFeature(i, i + 1)}
-                      className="px-2 py-1 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-xs"
-                    >
-                      ↓
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => removeFeature(i)}
-                      className="px-2 py-1 rounded-lg border border-rose-700 bg-rose-900/30 hover:bg-rose-900/40 text-xs"
-                    >
-                      Remove
-                    </button>
+                    <button type="button" title="Move up" onClick={() => moveFeature(i, i - 1)} className="px-2 py-1 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-xs">↑</button>
+                    <button type="button" title="Move down" onClick={() => moveFeature(i, i + 1)} className="px-2 py-1 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-xs">↓</button>
+                    <button type="button" onClick={() => removeFeature(i)} className="px-2 py-1 rounded-lg border border-rose-700 bg-rose-900/30 hover:bg-rose-900/40 text-xs">Remove</button>
                   </div>
                 </div>
               ))}
 
               <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => appendFeature({ title: "", subtitle: "" })}
-                  className="px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-sm"
-                >
+                <button type="button" onClick={() => appendFeature({ title: "", subtitle: "" })} className="px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-sm">
                   + Add feature
                 </button>
               </div>
@@ -380,78 +260,38 @@ export default function AddTripPageRHF() {
           <Section title="Time & Prices">
             <div className="grid sm:grid-cols-2 gap-3">
               <Field label="From" error={errors?.tripTime?.from?.message}>
-                <input
-                  className={inputCls(errors?.tripTime?.from)}
-                  placeholder="07:30 AM"
-                  {...register("tripTime.from", { required: "Required" })}
-                />
+                <input className={inputCls(errors?.tripTime?.from)} placeholder="07:30 AM" {...register("tripTime.from", { required: "Required" })} />
               </Field>
               <Field label="To" error={errors?.tripTime?.to?.message}>
-                <input
-                  className={inputCls(errors?.tripTime?.to)}
-                  placeholder="06:00 PM"
-                  {...register("tripTime.to", { required: "Required" })}
-                />
+                <input className={inputCls(errors?.tripTime?.to)} placeholder="06:00 PM" {...register("tripTime.to", { required: "Required" })} />
               </Field>
             </div>
 
             <div className="mt-4 grid sm:grid-cols-2 gap-3">
               <PriceGroup
                 legend="Adult"
-                // egpReg={register("prices.adult.egp", {
-                //   required: "Required",
-                //   min: { value: 0, message: ">= 0" },
-                //   valueAsNumber: true,
-                // })}
-                euroReg={register("prices.adult.euro", {
-                  required: "Required",
-                  min: { value: 0, message: ">= 0" },
-                  valueAsNumber: true,
-                })}
-                // egpError={errors?.prices?.adult?.egp?.message}
+                euroReg={register("prices.adult.euro", { required: "Required", min: { value: 0, message: ">= 0" }, valueAsNumber: true })}
                 euroError={errors?.prices?.adult?.euro?.message}
               />
               <PriceGroup
                 legend="Child"
-                // egpReg={register("prices.child.egp", {
-                //   required: "Required",
-                //   min: { value: 0, message: ">= 0" },
-                //   valueAsNumber: true,
-                // })}
-                euroReg={register("prices.child.euro", {
-                  required: "Required",
-                  min: { value: 0, message: ">= 0" },
-                  valueAsNumber: true,
-                })}
-                // egpError={errors?.prices?.child?.egp?.message}
+                euroReg={register("prices.child.euro", { required: "Required", min: { value: 0, message: ">= 0" }, valueAsNumber: true })}
                 euroError={errors?.prices?.child?.euro?.message}
               />
             </div>
 
             <label className="mt-4 inline-flex items-center gap-2 select-none">
-              <input
-                type="checkbox"
-                className="h-4 w-4 accent-emerald-500"
-                {...register("isActive")}
-              />
+              <input type="checkbox" className="h-4 w-4 accent-emerald-500" {...register("isActive")} />
               <span className="text-sm text-zinc-300">Mark trip as active</span>
             </label>
           </Section>
 
           {/* Actions */}
           <div className="flex gap-3 pt-2">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-5 py-2 rounded-xl border border-emerald-700 bg-emerald-900/30 hover:bg-emerald-900/40 text-sm font-medium disabled:opacity-60"
-            >
+            <button type="submit" disabled={isSubmitting} className="px-5 py-2 rounded-xl border border-emerald-700 bg-emerald-900/30 hover:bg-emerald-900/40 text-sm font-medium disabled:opacity-60">
               {isSubmitting ? "Saving…" : "Create trip"}
             </button>
-            <button
-              type="button"
-              onClick={() => reset()}
-              className="px-5 py-2 rounded-xl border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-sm"
-            >
+            <button type="button" onClick={() => reset()} className="px-5 py-2 rounded-xl border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-sm">
               Clear
             </button>
           </div>
@@ -461,4 +301,51 @@ export default function AddTripPageRHF() {
       <div className="pointer-events-none fixed inset-4 rounded-3xl border border-zinc-800/80" />
     </div>
   );
+}
+
+
+/* ---------- helpers ---------- */
+function Section({ title, children }) {
+  return (
+    <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 sm:p-5">
+      <h2 className="text-sm font-semibold mb-3 tracking-wide text-zinc-200">{title}</h2>
+      {children}
+    </section>
+  );
+}
+function Field({ label, error, children }) {
+  return (
+    <label className="block">
+      <div className="mb-1">
+        <span className="text-xs uppercase tracking-wide text-zinc-400">{label}</span>
+      </div>
+      {children}
+      {error && <p className="mt-1 text-rose-300 text-xs">{error}</p>}
+    </label>
+  );
+}
+function PriceGroup({ legend, egpReg, euroReg, egpError, euroError }) {
+  return (
+    <fieldset className="rounded-xl border border-zinc-800 p-3">
+      <legend className="px-1 text-xs text-zinc-400">{legend} price</legend>
+      <div className="grid grid-cols-2 gap-2">
+        {/* EGP field intentionally disabled per your original code */}
+        {/* <div>
+          <input className={inputCls(egpError)} placeholder="EGP" {...egpReg} />
+          {egpError && <p className="mt-1 text-rose-300 text-xs">{egpError}</p>}
+        </div> */}
+        <div>
+          <input className={inputCls(euroError)} placeholder="EUR" {...euroReg} />
+          {euroError && <p className="mt-1 text-rose-300 text-xs">{euroError}</p>}
+        </div>
+      </div>
+    </fieldset>
+  );
+}
+function inputCls(hasError, extra = "") {
+  return [
+    "w-full rounded-lg border bg-zinc-950/60 px-3 py-2 text-sm outline-none transition",
+    hasError ? "border-rose-700 focus:ring-2 focus:ring-rose-700/50" : "border-zinc-800 focus:ring-2 focus:ring-zinc-700/50",
+    extra,
+  ].join(" ");
 }

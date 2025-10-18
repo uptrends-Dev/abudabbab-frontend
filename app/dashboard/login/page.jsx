@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,22 +7,42 @@ import { Button } from "@/components/ui/button";
 import { User, Lock, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/apis/authApi";
+import { z } from "zod";
 
+const SignInSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Enter a valid email address"),
+  password: z.string().min(1, "Password is required"),
+});
 
 const page = () => {
 
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [pressed, setPressed] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const next = "/dashboard";
 
   async function Submit(email, password) {
     setLoading(true);
     setError(null);
+
+
+    const parsed = SignInSchema.safeParse({ email, password });
+    if (!parsed.success) {
+      const fieldErrors = parsed.error.issues.reduce((acc, issue) => {
+        acc[issue.path[0]] = issue.message;
+        return acc;
+      }, {});
+      // console.log("Validation errors:", fieldErrors);
+      setError(`${fieldErrors.email || ""} ${fieldErrors.password || ""}`.trim());
+      return;
+    }
+
     try {
       const { succeeded, redirectTo } = await login({ email, password });
-      
+
       if (succeeded) {
         router.replace(`${next}${redirectTo}` || next);
         router.refresh();
@@ -47,6 +67,15 @@ const page = () => {
     Submit(payload.email, payload.password);
   }
 
+  const revealDown = (e) => {
+    e && e.preventDefault();
+    setPressed(true);
+    setShowPassword(true);
+  };
+  const revealUp = () => {
+    setShowPassword(false);
+    setPressed(false);
+  };
   return (
     <div className="min-h-svh grid place-items-center bg-[radial-gradient(50%_50%_at_50%_0%,hsl(var(--primary)/0.18)_0%,transparent_65%)] from-primary/20 to-background p-4">
       {/* CSS-only 3D feel using group-hover (no state) */}
@@ -81,21 +110,29 @@ const page = () => {
                 <div className="grid gap-2" style={{ transform: "translateZ(12px)" }}>
                   <Label htmlFor="password">Password</Label>
                   <div className="relative">
-                    <Input id="password" name="password" type="password" placeholder="••••••••" autoComplete="current-password" required />
+                    <Input id="password" name="password" type={showPassword ? "text" : "password"} placeholder="••••••••" autoComplete="current-password" required />
                     <Lock className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   </div>
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <label className="inline-flex items-center gap-2 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 rounded border-input"
-                        onChange={(e) => {
-                          const input = (e.currentTarget.form?.elements.namedItem("password"));
-                          if (input) input.type = e.currentTarget.checked ? "text" : "password";
-                        }}
-                      />
-                      Show password
-                    </label>
+                  <div className="flex items-center text-sm text-muted-foreground gap-1.5">
+                    <button
+                      type="button"
+                      className={`${pressed ? "bg-gray-500 scale-95" : ""} inline-flex items-center gap-2 rounded-md border px-2 py-2 hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring transition-all`}
+                      aria-label="Hold to show password"
+                      onMouseDown={revealDown}
+                      onMouseUp={revealUp}
+                      onMouseLeave={revealUp}
+                      onTouchStart={revealDown}
+                      onTouchEnd={revealUp}
+                      onTouchCancel={revealUp}
+                      onKeyDown={(e) => {
+                        if (e.key === " " || e.key === "Enter") revealDown(e);
+                      }}
+                      onKeyUp={(e) => {
+                        if (e.key === " " || e.key === "Enter") revealUp();
+                      }}
+                    >
+                    </button>
+                    show password
                   </div>
                 </div>
 
@@ -120,7 +157,7 @@ function InlineAlert({ message }) {
     <div
       role="alert"
       aria-live="assertive"
-      className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+      className="rounded-lg bg-red-400 border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
     >
       {message}
     </div>
