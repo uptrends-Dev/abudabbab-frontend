@@ -46,13 +46,17 @@ export default function CheckoutSection() {
       : undefined;
 
     try {
+      const totalEuro = Number(bookingState?.totalPrice?.euro ?? baseTotal ?? 0)
+      const totalEgp = Number(bookingState?.totalPrice?.egp ?? 0)
       const payload = {
         tripInfo: String(bookingState.tripId),
         adult: Math.max(1, Number(bookingState?.adult ?? 1)),
         child: Math.max(0, Number(bookingState?.child ?? 0)),
+        subtotal: { egp: 0, euro: Number((baseTotal || 0).toFixed(2)) },
+        ...(appliedCoupon ? { coupon: { code: appliedCoupon.code, discount: { egp: 0, euro: appliedCoupon.discountEuro } } } : {}),
         totalPrice: {
-          egp: Number(bookingState?.totalPrice?.egp ?? 0),
-          euro: Number(bookingState?.totalPrice?.euro ?? 0),
+          egp: totalEgp,
+          euro: Number(totalEuro.toFixed(2)),
         },
         transportation: Boolean(bookingState?.transfer),
         user: {
@@ -71,7 +75,7 @@ export default function CheckoutSection() {
       console.log("Booking response:", res);
       alert("Booking created successfully!");
       reset();
-      dispatch(clearState);
+      dispatch(clearState());
       router.push("/trips");
       router.refresh();
     } catch (error) {
