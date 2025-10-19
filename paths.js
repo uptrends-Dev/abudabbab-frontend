@@ -10,3 +10,5 @@ export const LOGIN = `${BASE}/admin/auth/login`
 export const WHOISME = `${BASE}/admin/auth/me`
 export const AUTH = `${BASE}/admin/auth`
 export const EXPORT = `${BASE}/bookings/export`
+export const COUPONS_URL = `${BASE}/coupons`
+export const COUPONS_ADMIN = `${BASE}/coupons`

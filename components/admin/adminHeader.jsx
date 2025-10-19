@@ -12,6 +12,7 @@ const ALL_TABS = [
   { label: "Advanced Infos", path: "/dashboard/advancedInfos" },
   { label: "Bookings", path: "/dashboard/bookings" },
   { label: "Users", path: "/dashboard/users" },
+  { label: "Coupons", path: "/dashboard/coupons" },
   { label: "Gate", path: "/dashboard/gate" },
 ];
 
