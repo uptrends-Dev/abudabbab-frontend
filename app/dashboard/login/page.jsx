@@ -37,6 +37,7 @@ const page = () => {
       }, {});
       // console.log("Validation errors:", fieldErrors);
       setError(`${fieldErrors.email || ""} ${fieldErrors.password || ""}`.trim());
+      setLoading(false);
       return;
     }
 

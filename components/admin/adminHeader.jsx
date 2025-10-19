@@ -39,12 +39,11 @@ const AdminHeader = () => {
   const pathname = usePathname();
   if (pathname === "/dashboard/login") return null;
 
-  const router = useRouter();
-
   
   const [role, setRole] = React.useState(null);
   const [username, setUsername] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
+  const router = useRouter();
   
 
   async function onLogout() {

@@ -1,10 +1,22 @@
-import { headers } from "next/headers";
 import AdminHeader from "@/components/admin/adminHeader";
-import ReduxTripsProvider from '@/components/Provides/reduxProvider'
-export default function dashboardLayout({ children }) {
+import { whoisme } from "@/lib/apis/api";
+
+async function getUserData() {
+  try {
+    // Make the API call or perform the check (assuming whoisme() is a function or API call)
+    await whoisme();
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+export default async function dashboardLayout({ children }) {
+  const headerVisible = await getUserData();
+
   return (
     <>
-      <AdminHeader />
+      {headerVisible && <AdminHeader />}
       <div className="bg-black min-h-screen">
         {children}
       </div>
