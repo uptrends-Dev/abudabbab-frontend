@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -17,7 +17,8 @@ import { BOOKING } from "@/paths";
 
 import { useRouter } from "next/navigation";
 import { checkOut } from "@/lib/apis/api";
-import { clearState } from "@/app/store/slice/checkoutSlice";
+import { clearState, updateTotalPrice } from "@/app/store/slice/checkoutSlice";
+import { validateCouponCode } from "@/lib/apis/couponApi";
 
 export default function CheckoutSection() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function CheckoutSection() {
   const bookingState = useSelector((state) => state.checkout);
   const Trip = useSelector((state) => state.trips);
   const selectedTrip = Trip.trips.find(t => t._id === bookingState.tripId) || null
+
 
   const {
     register,
@@ -110,9 +112,46 @@ export default function CheckoutSection() {
   const childPriceEuro = selectedTrip?.prices?.child?.euro ?? 0;
   const transferFee = bookingState?.bookingDetails?.transfer ? 25 : 0;
 
-  const total =
-    bookingState?.totalPrice?.euro ??
-    adultPriceEuro * adults + childPriceEuro * children + transferFee;
+  const baseTotal = adultPriceEuro * adults + childPriceEuro * children + transferFee;
+
+  const [couponCode, setCouponCode] = useState("");
+  const [couponError, setCouponError] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [isApplying, setIsApplying] = useState(false);
+
+  const total = bookingState?.totalPrice?.euro ?? baseTotal;
+
+  const handleApplyCoupon = async () => {
+    setCouponError("");
+    if (!couponCode.trim()) {
+      setCouponError("Please enter a coupon code");
+      return;
+    }
+    try {
+      setIsApplying(true);
+      const result = await validateCouponCode(couponCode.trim());
+      // result shape: { status: "success", data: { type, discount } } OR throw on fail
+      const couponType = result?.type;
+      const discountObj = result?.discount;
+
+      let discountEuro = 0;
+      if (couponType === "amount") {
+        discountEuro = Number(discountObj?.euro ?? 0);
+      } else if (couponType === "percent") {
+        const percent = Number(discountObj?.percent ?? 0);
+        discountEuro = (baseTotal * percent) / 100;
+      }
+
+      const newTotal = Math.max(0, baseTotal - discountEuro);
+      dispatch(updateTotalPrice({ egp: 0, euro: Number(newTotal.toFixed(2)) }));
+      setAppliedCoupon({ code: couponCode.trim(), discountEuro: Number(discountEuro.toFixed(2)) });
+    } catch (e) {
+      setAppliedCoupon(null);
+      setCouponError(e?.message || "Failed to apply coupon");
+    } finally {
+      setIsApplying(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -290,12 +329,49 @@ export default function CheckoutSection() {
                 </Row>
               </dl>
 
+              <div className="mt-4">
+                <label htmlFor="coupon" className="block text-sm font-medium text-gray-800">Coupon Code</label>
+                <div className="mt-1 flex gap-2">
+                  <input
+                    id="coupon"
+                    type="text"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    placeholder="Enter coupon"
+                    className="flex-1 rounded-lg border bg-white p-2 outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleApplyCoupon}
+                    disabled={isApplying}
+                    className="whitespace-nowrap rounded-lg bg-blue-600 px-4 py-2 text-white font-semibold disabled:opacity-60"
+                  >
+                    {isApplying ? "Applying..." : "Apply"}
+                  </button>
+                </div>
+                {couponError && (
+                  <p className="mt-1 text-xs text-red-600">{couponError}</p>
+                )}
+                {appliedCoupon && !couponError && (
+                  <p className="mt-1 text-xs text-emerald-700">Applied {appliedCoupon.code}. Saved €{appliedCoupon.discountEuro}.</p>
+                )}
+              </div>
+
               <div className="mt-4 border-t pt-4 flex items-end justify-between">
                 <div>
                   <p className="text-lg font-semibold">Total</p>
                   <p className="text-xs text-gray-600">All taxes and fees included</p>
                 </div>
-                <p className="text-2xl font-bold tracking-tight">{total}€</p>
+                <div className="text-right">
+                  {appliedCoupon && bookingState?.totalPrice?.euro !== undefined ? (
+                    <>
+                      <p className="text-sm line-through text-gray-500">€{baseTotal.toFixed(2)}</p>
+                      <p className="text-2xl font-bold tracking-tight">€{Number(total).toFixed(2)}</p>
+                    </>
+                  ) : (
+                    <p className="text-2xl font-bold tracking-tight">€{Number(bookingState.originalPrice.euro).toFixed(2)}</p>
+                  )}
+                </div>
               </div>
             </div>
             <Link href={"/trips"}>

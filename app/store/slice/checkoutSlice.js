@@ -7,6 +7,7 @@ const initialState = {
   payment: false,
   bookingDate: '',
   totalPrice: { egp: 0, euro: 0 },
+  originalPrice: { egp: 0, euro: 0 },
   tripId: '',
   bookingDetails: false,
 }
@@ -22,6 +23,7 @@ const bookingSlice = createSlice({
       state.payment = action.payload.payment
       state.bookingDate = action.payload.bookingDate
       state.totalPrice = action.payload.totalPrice
+      state.originalPrice = action.payload.totalPrice
       state.tripId = action.payload.tripId
       state.bookingDetails = true
     },
