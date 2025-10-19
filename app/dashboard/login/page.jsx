@@ -151,7 +151,7 @@ const page = () => {
 export default page;
 
 
-// ------------------helpers functions
+// ---------------helpers functions
 function InlineAlert({ message }) {
   return (
     <div
