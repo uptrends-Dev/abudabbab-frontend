@@ -25,7 +25,9 @@ function tabsForRole(role) {
         ["Advanced Infos", "Bookings"].includes(t.label)
       );
     case "ADMIN":
-      return ALL_TABS.filter((t) => !["Advanced Infos", "Gate"].includes(t.label));
+      return ALL_TABS.filter(
+        (t) => !["Advanced Infos", "Gate"].includes(t.label)
+      );
     case "EMPLOYEE":
       return ALL_TABS.filter((t) => t.label === "Bookings");
     case "GATE":
@@ -40,12 +42,10 @@ const AdminHeader = () => {
   const pathname = usePathname();
   if (pathname === "/dashboard/login") return null;
 
-  
   const [role, setRole] = React.useState(null);
   const [username, setUsername] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const router = useRouter();
-  
 
   async function onLogout() {
     try {
@@ -80,22 +80,23 @@ const AdminHeader = () => {
   if (loading || !role) return null;
 
   const visibleTabs = tabsForRole(role);
-  
 
   return (
     <header className="sticky top-0 z-30 border-b border-zinc-800 bg-zinc-950/95 backdrop-blur">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
         {/* left: admin */}
         <div className="flex items-center gap-3 min-w-0">
-          {role == "SUPER_ADMIN" && (
+          {role === "SUPER_ADMIN" && (
             <button
-              onClick={() => router.push("/dashboard/settings")}
+              type="button"
               aria-label="Settings"
-              className="h-8 w-8 rounded-full grid place-items-center border border-zinc-700 bg-zinc-900"
+              onClick={() => router.push("/dashboard/settings")}
+              className="h-8 w-8 rounded-full grid place-items-center border border-zinc-700 bg-zinc-900 cursor-pointer hover:bg-green-900 transition duration-200"
             >
-              <Settings className="text-white" />
+              <Settings className="text-white hover:rotate-30 transition duration-200" />
             </button>
           )}
+
           <div className="hidden sm:block text-xs leading-tight text-zinc-300">
             <div className="font-semibold">{username}</div>
             <div className="text-zinc-500">{role}</div>
@@ -114,13 +115,14 @@ const AdminHeader = () => {
           {visibleTabs.map((tab) => {
             const isActive = pathname === tab.path;
             return (
-              <Link key={tab.label} href={tab.path} className="shrink-0">
+              <Link key={tab.label} href={tab.path} className="shrink-0 rounded-lg  ">
                 <button
                   aria-current={isActive ? "page" : undefined}
-                  className={`cursor-pointer px-2.5 sm:px-3 py-1.5 rounded-lg border text-xs sm:text-sm transition-colors whitespace-nowrap shrink-0
-                    ${isActive
-                      ? "border-orange-700 bg-orange-900/40 text-orange-200"
-                      : "border-zinc-800 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-900"
+                  className={` cursor-pointer px-2.5 sm:px-3 py-1.5 rounded-lg border text-xs sm:text-sm transition-colors whitespace-nowrap shrink-0
+                    ${
+                      isActive
+                        ? "border-orange-700 bg-orange-900/40 text-orange-200 hover:bg-gray-500"
+                        : "border-zinc-800 bg-zinc-900/50 text-zinc-300  hover:bg-gray-500"
                     }`}
                 >
                   {tab.label}
@@ -131,9 +133,12 @@ const AdminHeader = () => {
           <button
             onClick={onLogout}
             aria-label="Log out"
-            className="h-8 w-8 rounded-full grid place-items-center border border-zinc-700 bg-zinc-900"
+            className=" cursor-pointer flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900/80 px-3 py-2 
+             text-sm font-medium text-zinc-300 hover:bg-red-900/60 hover:border-red-500 hover:text-red-400
+             active:scale-95 transition-all duration-300 ease-out"
           >
-            <LogOut className="text-white" />
+            <LogOut className="w-4 h-4" />
+            <span>Logout</span>
           </button>
         </nav>
       </div>

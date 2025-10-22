@@ -178,7 +178,7 @@ export default function UsersPage() {
           {superAdmins.map((admin) => (
             <div
               key={admin._id}
-              className="bg-zinc-800 p-6 rounded-lg shadow-lg w-full max-w-[350px] flex flex-col items-center justify-center"
+              className="bg-zinc-800 p-6 rounded-xl shadow-lg w-full max-w-[350px] flex flex-col items-center justify-center"
             >
               <h2 className="text-2xl text-zinc-100 font-semibold text-center">{admin.username}</h2>
               <p className="text-zinc-400 text-center">{admin.email}</p>

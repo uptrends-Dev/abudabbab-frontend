@@ -190,10 +190,10 @@ const CouponTable = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      <main className="p-6">
+    <div className=" bg-neutral-900 text-neutral-200 text-zinc-100">
+      <main className="p-6 max-w-7xl mx-auto min-h-screen">
         {/* Header with Add Button */}
-        <div className="mb-6 flex justify-between items-center">
+        <div className="mb-6 flex justify-between items-center  ">
           <h1 className="text-lg sm:text-xl font-semibold">
             Coupon Management
           </h1>
@@ -303,6 +303,13 @@ const CouponTable = () => {
                         >
                           Edit
                         </button>
+                        
+                        <button
+                          onClick={() => handleDeleteCoupon(coupon._id)}
+                          className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm text-white"
+                        >
+                          Delete
+                        </button>
                         <button
                           onClick={() => handleToggleStatus(coupon._id)}
                           className={`px-3 py-1 rounded text-sm text-white ${
@@ -312,12 +319,6 @@ const CouponTable = () => {
                           }`}
                         >
                           {coupon.active ? "Deactivate" : "Activate"}
-                        </button>
-                        <button
-                          onClick={() => handleDeleteCoupon(coupon._id)}
-                          className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm text-white"
-                        >
-                          Delete
                         </button>
                       </Td>
                     </tr>
