@@ -2,7 +2,7 @@
 import Image from "next/image";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { login } from "@/lib/apis/authApi";
+import { login } from "../../../lib/apis/authApi";
 import { z } from "zod";
 
 const SignInSchema = z.object({

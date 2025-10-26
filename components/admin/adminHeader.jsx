@@ -1,7 +1,7 @@
 "use client";
 
 import { whoisme } from "@/lib/apis/api";
-import { logout } from "@/lib/apis/authApi";
+import { logout } from "../../lib/apis/authApi";
 import { LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
