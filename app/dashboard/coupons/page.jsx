@@ -172,6 +172,7 @@ const CouponTable = () => {
 
   // Handle opening edit modal
   const handleOpenEditModal = (coupon) => {
+    console.log(coupon)
     setEditCoupon(coupon);
     setError(null);
     setShowEditModal(true);
@@ -190,7 +191,7 @@ const CouponTable = () => {
   };
 
   return (
-    <div className=" bg-neutral-900 text-neutral-200 text-zinc-100">
+    <div className=" bg-neutral-900 text-zinc-100">
       <main className="p-6 max-w-7xl mx-auto min-h-screen">
         {/* Header with Add Button */}
         <div className="mb-6 flex justify-between items-center  ">
