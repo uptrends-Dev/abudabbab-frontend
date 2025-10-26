@@ -1,5 +1,6 @@
 import AdminHeader from "../../components/admin/adminHeader";
-import { whoisme } from "@/lib/apis/api";
+import { whoisme } from "../../lib/apis/api";
+import { logout } from "../../lib/apis/authApi";
 
 async function getUserData() {
   try {
@@ -7,12 +8,14 @@ async function getUserData() {
     await whoisme();
     return true;
   } catch (error) {
+    logout()
     return false;
   }
 }
 
 export default async function dashboardLayout({ children }) {
   const headerVisible = await getUserData();
+
 
   return (
     <>
