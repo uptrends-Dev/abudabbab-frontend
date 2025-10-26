@@ -200,32 +200,38 @@ export default function UsersPage() {
       )}
 
       {/* Search and Role Filter */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-lg font-semibold text-zinc-100">Manage Users</h1>
-        <div className="flex gap-4">
+
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
           <button
             onClick={() => openCreate()}
-            className="px-2 py-1 rounded border text-white border-zinc-700 hover:bg-zinc-900"
+            className="w-full sm:w-auto px-2 py-1 rounded border text-white border-zinc-700 hover:bg-zinc-900"
           >
             add
           </button>
-          <input
-            type="text"
-            className="px-3 py-2 rounded border border-zinc-700 bg-zinc-900 text-zinc-100"
-            placeholder="Search by username/email"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <select
-            className="px-3 py-2 rounded border border-zinc-700 bg-zinc-900 text-zinc-100"
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-          >
-            <option value="">All Roles</option>
-            {ROLES.map((r) => (
-              <option key={r} value={r}>{r}</option>
-            ))}
-          </select>
+
+          {/* Search + Role */}
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:w-[32rem]">
+            <input
+              type="text"
+              className="min-w-0 flex-1 px-3 py-2 rounded border border-zinc-700 bg-zinc-900 text-zinc-100"
+              placeholder="Search by username/email"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+
+            <select
+              className="w-full sm:w-40 px-3 py-2 rounded border border-zinc-700 bg-zinc-900 text-zinc-100"
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+            >
+              <option value="">All Roles</option>
+              {ROLES.map((r) => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
