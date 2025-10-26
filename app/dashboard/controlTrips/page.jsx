@@ -2,7 +2,7 @@
 import Link from "next/link";
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
-import { deleletrip, getallTrips } from "@/lib/apis/api";
+import { deleletrip, getallTrips } from "../../../lib/apis/api";
 import { TRIP_API_ADMIN, TRIPS_URL } from "@/paths";
 
 /* ---------- tiny helper ---------- */
