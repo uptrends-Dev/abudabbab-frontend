@@ -2,6 +2,8 @@
 
 import { deleteUser, getUsers, registerUser, updateUser } from "@/lib/apis/api";
 import { AUTH } from "@/paths";
+import { CldUploadWidget } from "next-cloudinary";
+import Image from "next/image";
 import React from "react";
 
 const API_BASE = AUTH; // ← change if your authRouter is mounted elsewhere
@@ -201,12 +203,12 @@ export default function UsersPage() {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-lg font-semibold text-zinc-100">Manage Users</h1>
         <div className="flex gap-4">
-        <button
-          onClick={() => openCreate()}
-          className="px-2 py-1 rounded border text-white border-zinc-700 hover:bg-zinc-900"
-        >
-          add
-        </button>
+          <button
+            onClick={() => openCreate()}
+            className="px-2 py-1 rounded border text-white border-zinc-700 hover:bg-zinc-900"
+          >
+            add
+          </button>
           <input
             type="text"
             className="px-3 py-2 rounded border border-zinc-700 bg-zinc-900 text-zinc-100"
@@ -358,13 +360,89 @@ export default function UsersPage() {
                   </select>
                 </div>
                 {/* Profile Picture URL */}
+                {/* Profile Picture */}
                 <div className="sm:col-span-2">
-                  <label className="block text-xs text-zinc-400 mb-1">Profile Picture URL</label>
-                  <input
-                    className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100"
-                    value={form.profilePicture}
-                    onChange={(e) => setForm((f) => ({ ...f, profilePicture: e.target.value }))}
-                  />
+                  <label className="block text-xs text-zinc-400 mb-1">Profile Picture</label>
+
+                  <div className="flex items-center gap-3">
+                    {/* Preview (if selected) */}
+                    {form.profilePicture ? (
+                      <div className="relative h-14 w-14 overflow-hidden rounded border border-zinc-700 bg-zinc-900">
+                        <Image
+                          src={form.profilePicture}
+                          alt="Profile preview"
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-14 w-14 rounded border border-zinc-800 bg-zinc-900 grid place-items-center text-zinc-500 text-xs">
+                        N/A
+                      </div>
+                    )}
+
+                    {/* Upload button */}
+                    <CldUploadWidget
+                      uploadPreset="image_abodbab"
+                      options={{
+                        maxFileSize: 2_000_000, // ~2MB
+                        sources: ["local", "camera"],
+                        resourceType: "image",
+                        clientAllowedFormats: ["jpg", "jpeg", "png", "webp"],
+                        multiple: false,
+                        styles: {
+                          palette: {
+                            window: "#07253E",
+                            windowBorder: "#90A0B3",
+                            tabIcon: "#0078FF",
+                            menuIcons: "#5A616A",
+                            textDark: "#000000",
+                            textLight: "#FFFFFF",
+                            link: "#0078FF",
+                            action: "#FF620C",
+                            inactiveTabIcon: "#245DA7",
+                            error: "#F44235",
+                            inProgress: "#0078FF",
+                            complete: "#20B832",
+                            sourceBg: "#000000",
+                          },
+                          fonts: { default: { active: true } },
+                        },
+                      }}
+                      onSuccess={(result) => {
+                        const info = result?.info;
+                        const url =
+                          info && typeof info === "object" && (info.secure_url || info.url);
+                        if (url) {
+                          setForm((f) => ({ ...f, profilePicture: String(url) }));
+                        }
+                      }}
+                    >
+                      {({ open }) => (
+                        <button
+                          type="button"
+                          onClick={() => open()}
+                          className="px-3 py-2 rounded border border-zinc-700 text-zinc-200 hover:bg-zinc-900"
+                        >
+                          {form.profilePicture ? "Change Photo" : "Upload Photo"}
+                        </button>
+                      )}
+                    </CldUploadWidget>
+
+                    {/* Clear button */}
+                    {form.profilePicture && (
+                      <button
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, profilePicture: "" }))}
+                        className="px-3 py-2 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-900"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Hidden field so your API receives the value if you serialize the form */}
+                  <input type="hidden" name="profilePicture" value={form.profilePicture} />
                 </div>
                 {/* Bio */}
                 <div className="sm:col-span-2">
