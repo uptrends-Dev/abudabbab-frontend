@@ -1,4 +1,4 @@
-import AdminHeader from "../../components/admin/adminHeader";
+import AdminHeader from "@/components/admin/adminHeader";
 import { whoisme } from "@/lib/apis/api";
 
 async function getUserData() {
