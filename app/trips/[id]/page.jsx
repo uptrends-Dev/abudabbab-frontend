@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
 import axios, { get } from "axios";
 // import { setBookingDetails } from "@/app/store/bookingSlice";
-import { getTrip } from "@/lib/apis/api";
+// import { getTrip } from "@/lib/apis/api";
 import { setBookingData } from "@/app/store/slice/checkoutSlice";
 
 export default function Page() {

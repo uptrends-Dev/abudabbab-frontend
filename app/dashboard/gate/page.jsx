@@ -5,7 +5,7 @@ import QrAutoScanner from "@/components/admin/QrAutoScanner";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { getToken } from "@/lib/helpers/token";
-import { checkedInBooking, getBooking, paidBooking } from "@/lib/apis/api";
+import { checkedInBooking, getBooking, paidBooking } from "../../../lib/apis/api";
 import { BOOKING_ADMIN } from "@/paths";
 
 // const url = "https://abudabbba-backend.vercel.app/api/bookings/admin"

@@ -40,12 +40,12 @@ function tabsForRole(role) {
 const AdminHeader = () => {
   // Hide header on login page
   const pathname = usePathname();
-  if (pathname === "/dashboard/login") return null;
+  const router = useRouter();
+  
 
   const [role, setRole] = React.useState(null);
   const [username, setUsername] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
-  const router = useRouter();
 
   async function onLogout() {
     try {
@@ -76,7 +76,7 @@ const AdminHeader = () => {
     };
     checkAuth();
   }, [router]);
-
+if (pathname === "/dashboard/login") return null;
   if (loading || !role) return null;
 
   const visibleTabs = tabsForRole(role);

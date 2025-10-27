@@ -16,9 +16,9 @@ import { IoIosArrowForward } from "react-icons/io";
 import { BOOKING } from "@/paths";
 
 import { useRouter } from "next/navigation";
-import { checkOut } from "@/lib/apis/api";
+import { checkOut } from "../../../lib/apis/api";
 import { clearState, updateTotalPrice } from "@/app/store/slice/checkoutSlice";
-import { validateCouponCode } from "@/lib/apis/couponApi";
+import { validateCouponCode } from "../../../lib/apis/couponApi";
 
 export default function CheckoutSection() {
   const router = useRouter();

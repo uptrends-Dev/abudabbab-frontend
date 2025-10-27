@@ -4,8 +4,8 @@ import { CldUploadWidget } from "next-cloudinary";
 import Link from "next/link";
 import React from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
-import { posttrip } from "@/lib/apis/api";
-import { TRIP_API_ADMIN } from "@/paths";
+import { posttrip } from "../../../../lib/apis/api";
+import { TRIP_API_ADMIN } from "../../../../paths";
 
 
 

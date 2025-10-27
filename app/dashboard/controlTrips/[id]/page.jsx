@@ -5,7 +5,7 @@ import { CldUploadWidget } from "next-cloudinary";
 import React, { useEffect, useRef, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { useParams, useRouter } from "next/navigation";
-import { getallTrips, posttrip, updatetrip } from "@/lib/apis/api";
+import { getallTrips, posttrip, updatetrip } from "../../../../lib/apis/api";
 import Image from "next/image";
 import { TRIP_API_ADMIN, TRIPS_URL } from "@/paths";
 

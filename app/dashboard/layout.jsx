@@ -23,9 +23,7 @@ async function logoutAction() {
   }
 }
 
-export default async function DashboardLayout({
-  children,
-}) {
+export default async function DashboardLayout({ children }) {
   const authed = await getUserData();
 
   if (!authed) {
@@ -44,24 +42,19 @@ export default async function DashboardLayout({
                          text-sm font-medium text-zinc-300 hover:bg-red-900/60 hover:border-red-500 hover:text-red-400
                          active:scale-95 transition-all duration-300 ease-out"
             >
-              <span>Logout</span>
+              <span>Login Again</span>
             </button>
           </form>
 
           {/* (Optional) direct-to-login button without calling logout */}
-          <form
-            action={async () => {
-              "use server";
-              redirect("/dashboard/login");
-            }}
-          >
+          {/* <form action={logoutAction}>
             <button
               type="submit"
               className="text-sm text-zinc-400 hover:text-zinc-200 underline"
             >
               Go to login
             </button>
-          </form>
+          </form> */}
         </div>
       </div>
     );

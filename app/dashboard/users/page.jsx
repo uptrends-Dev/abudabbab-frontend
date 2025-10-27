@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getallUsers } from "@/lib/apis/api";
+import { getallUsers } from "../../../lib/apis/api";
 import { FaWhatsapp } from "react-icons/fa"; // Importing WhatsApp icon
 
 export default function UsersPage() {

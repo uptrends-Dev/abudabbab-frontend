@@ -14,7 +14,7 @@ import {
   Plus,
 } from "lucide-react";
 import moment from "moment";
-import { getadvancedTripInfo, getTotalInfo } from "@/lib/apis/api";
+import { getadvancedTripInfo, getTotalInfo } from "../../../lib/apis/api";
 import { ADVANCED_INFO_URL, TOTALS_URL } from "@/paths";
 
 

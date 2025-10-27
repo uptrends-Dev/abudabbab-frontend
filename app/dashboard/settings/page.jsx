@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteUser, getUsers, registerUser, updateUser } from "@/lib/apis/api";
+import { deleteUser, getUsers, registerUser, updateUser } from "../../../lib/apis/api";
 import { AUTH } from "@/paths";
 import { CldUploadWidget } from "next-cloudinary";
 import Image from "next/image";
