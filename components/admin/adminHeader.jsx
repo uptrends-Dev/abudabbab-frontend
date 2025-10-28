@@ -40,12 +40,33 @@ function tabsForRole(role) {
 const AdminHeader = () => {
   // Hide header on login page
   const pathname = usePathname();
+
   const router = useRouter();
-
-
   const [role, setRole] = React.useState(null);
   const [username, setUsername] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const data = await whoisme(); // expect { role: "..." }
+        setUsername(data?.username || null);
+        if (!data?.role) throw new Error("No role found");
+        // normalize role to match our enum
+        // e.g. "super_admin" -> "SUPER_ADMIN"
+        const normalized = String(data?.role || "").toUpperCase();
+        setRole(normalized);
+        console.log(data, normalized);
+        router.refresh();
+      } catch (error) {
+        console.error("Error checking authentication:", error);
+        router.replace("/dashboard/login");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   async function onLogout() {
     try {
@@ -57,27 +78,6 @@ const AdminHeader = () => {
     }
   }
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const data = await whoisme(); // expect { role: "..." }
-        setUsername(data?.username || null);
-        if (!data?.role) throw new Error("No role found");
-        // normalize role to match our enum
-        // e.g. "super_admin" -> "SUPER_ADMIN"
-        const normalized = String(data?.role || "").toUpperCase();
-        setRole(normalized);
-        console.log(data, normalized)
-      } catch (error) {
-        console.error("Error checking authentication:", error);
-        router.replace("/dashboard/login");
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkAuth();
-  }, [router]);
-  if (pathname === "/dashboard/login") return null;
   if (loading || !role) return null;
 
   const visibleTabs = tabsForRole(role);
@@ -116,13 +116,18 @@ const AdminHeader = () => {
           {visibleTabs.map((tab) => {
             const isActive = pathname === tab.path;
             return (
-              <Link key={tab.label} href={tab.path} className="shrink-0 rounded-lg  ">
+              <Link
+                key={tab.label}
+                href={tab.path}
+                className="shrink-0 rounded-lg  "
+              >
                 <button
                   aria-current={isActive ? "page" : undefined}
                   className={` cursor-pointer px-2.5 sm:px-3 py-1.5 rounded-lg border text-xs sm:text-sm transition-colors whitespace-nowrap shrink-0
-                    ${isActive
-                      ? "border-orange-700 bg-orange-900/40 text-orange-200 hover:bg-gray-500"
-                      : "border-zinc-800 bg-zinc-900/50 text-zinc-300  hover:bg-gray-500"
+                    ${
+                      isActive
+                        ? "border-orange-700 bg-orange-900/40 text-orange-200 hover:bg-gray-500"
+                        : "border-zinc-800 bg-zinc-900/50 text-zinc-300  hover:bg-gray-500"
                     }`}
                 >
                   {tab.label}
