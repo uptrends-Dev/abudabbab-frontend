@@ -1,6 +1,4 @@
 "use client";
-import TripsSection from "@/components/website/tripsPage/TripsSection";
-import { Button } from '@/components/ui/button';
 import { useRouter } from "next/navigation";
 
 export default function Home() {
