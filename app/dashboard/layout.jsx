@@ -4,7 +4,7 @@ import AdminHeader from "../../components/admin/adminHeader";
 import { whoisme } from "../../lib/apis/api";
 import { logout } from "../../lib/apis/authApi";
 import Adminpro from "../../components/admin/Adminpro";
-import CallBackLogOut from "../../components/utils/CallBackLogOut";
+import CallBackLogOut from "../../components/utils/CallBackLogOutt";
 
 async function getUserData() {
   try {
