@@ -5,6 +5,7 @@ import { whoisme } from "../../lib/apis/api";
 import { logout } from "../../lib/apis/authApi";
 import Adminpro from "../../components/admin/Adminpro";
 import CallBackLogOut from "../../components/utils/CallBackLogOut";
+
 async function getUserData() {
   try {
     await whoisme();
