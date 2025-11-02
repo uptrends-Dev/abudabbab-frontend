@@ -3,7 +3,7 @@
 import React, { useLayoutEffect } from "react";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import CheckOut from "../../../components/website/tripsPage/CheckoutPages";
+import CheckOut from "../../../../components/website/tripsPage/CheckoutPages";
 
 export default function Page() {
   const router = useRouter();
@@ -12,7 +12,7 @@ export default function Page() {
   // Block paint + redirect if invalid
   useLayoutEffect(() => {
     if (bookingState && !bookingState.bookingDetails) {
-      router.replace("/trips");
+      router.replace("/home/trip");
     }
   }, [bookingState, router]);
 

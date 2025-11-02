@@ -3,7 +3,7 @@ import React, { useEffect, useMemo } from "react"; // UPDATED: useMemo
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchTripsData } from "@/lib/apis/tripsApi";
+import { fetchTripsData } from "../../../lib/apis/tripsApi";
 import Image from "next/image";
 
 const container = {
@@ -32,10 +32,10 @@ export default function TripsSection() {
   if (loading) return <div className="loader" />;
 
   return (
-    <section id="trips" className="bg-main py-16 overflow-hidden min-h-screen">
-      <div className="mx-auto max-w-7xl px-6 text-center lg:px-8 overflow-hidden min-h-screen">
+    <section id="trips" className="bg-main py-16 overflow-hidden ">
+      <div className="mx-auto max-w-7xl px-6 text-center lg:px-8 overflow-hidden">
         <motion.p
-          className="text-teal-900/80 font-serif text-xl"
+          className="text-[#007DB0] font-serif text-xl"
           initial={{ opacity: 0, y: 14 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
@@ -45,17 +45,17 @@ export default function TripsSection() {
         </motion.p>
 
         <motion.h2
-          className="mt-2 text-4xl font-bold text-teal-900"
+          className="mt-2 text-4xl font-bold text-blue"
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5 }}
         >
-          <span className="text-orange-500">Our</span> Trips
+          <span className="text-orange">Find Your Trip</span> 
         </motion.h2>
 
         <motion.p
-          className="mx-auto mt-3 max-w-2xl text-sm text-slate-500"
+          className="mx-auto mt-3 max-w-2xl text-sm text-blue"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
@@ -141,7 +141,7 @@ export default function TripsSection() {
                     >
                       €{t?.prices?.adult?.euro ?? "--"} {/* UPDATED: safe access + € */}
                     </span>
-                    <Link href={`/trips/${t?._id ?? ""}`}> {/* UPDATED: safe href */}
+                    <Link href={`/home/trip/${t?._id ?? ""}`}> {/* UPDATED: safe href */}
                       <button
                         className="
                           relative bg-orange-500 text-white py-2 px-4 rounded-[10px]

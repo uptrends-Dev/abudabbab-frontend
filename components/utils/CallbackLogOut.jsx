@@ -1,8 +1,8 @@
-'use client'
+"use client";
+import React from "react";
 import { useRouter } from "next/navigation";
 import { logout } from "../../lib/apis/authApi";
-
-const CallbackLogOut = () => {
+const CallBackLogOut = () => {
   const router = useRouter();
 
   async function onLogout() {
@@ -14,7 +14,6 @@ const CallbackLogOut = () => {
       console.error(error);
     }
   }
-
   return (
     <div>
       <div className="min-h-screen bg-black text-zinc-100 grid place-items-center">
@@ -39,4 +38,4 @@ const CallbackLogOut = () => {
   );
 };
 
-export default CallbackLogOut;
+export default CallBackLogOut;

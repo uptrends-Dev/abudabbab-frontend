@@ -7,7 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import axios, { get } from "axios";
 // import { setBookingDetails } from "@/app/store/bookingSlice";
 // import { getTrip } from "@/lib/apis/api";
-import { setBookingData } from "@/app/store/slice/checkoutSlice";
+import { setBookingData } from "../../../../app/store/slice/checkoutSlice";
 
 export default function Page() {
   const today = new Date().toISOString().split('T')[0];
@@ -25,7 +25,7 @@ export default function Page() {
     }
     fetchCurrancyEx();
   }, []);
-  // console.log(currancy);
+  console.log(currancy);
   const tripsInStore = useSelector((s) => s.trips.trips);
   // const booking = useSelector((s) => s.bookings);
 
@@ -113,7 +113,7 @@ export default function Page() {
       totalPrice: { egp: totalEgp, euro: totalEuro },
       tripId: trip._id,
     }));
-    router.push("/trips/checkOut");
+    router.push("/home/trip/checkOut");
   };
 
   // useEffect(() => {

@@ -1,9 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@theme {
-  --color-orange: #FE6F19;
-  --color-blue:  #007DB0;
-}
+
 .loader {
   width: 40px;
   aspect-ratio: 1;
@@ -49,8 +46,3 @@
 body {
   font-family: "poppins", sans-serif;
 } */
-.tripBanner{
-  background-image: url('/bannerPhoto.jpg');
-  background-attachment: fixed;
-  background-size: cover;
-}
