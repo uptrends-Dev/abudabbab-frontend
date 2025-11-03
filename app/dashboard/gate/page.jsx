@@ -125,7 +125,7 @@ export default function GatePage() {
   return (
     <div
       dir="rtl"
-      className="min-h-screen bg-gradient-to-b from-[#0b1320] to-[#111827] text-white"
+      className="min-h-screen bg-gradient-to-b from-[#ffffff] to-[#e5edff] text-black"
     >
       <div className="max-w-5xl mx-auto p-6">
         <header className="flex items-center gap-3 mb-6">

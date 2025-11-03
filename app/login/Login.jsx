@@ -2,7 +2,7 @@
 import Image from "next/image";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { login } from "../../../lib/apis/authApi";
+import { login } from "../../lib/apis/authApi";
 import { z } from "zod";
 
 const SignInSchema = z.object({
@@ -67,7 +67,7 @@ export default function Login({ imageSrc = "/p1.jpg" }) {
   };
 
   return (
-    <section className="min-h-screen w-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center px-4 py-10">
+    <section className="min-h-screen   w-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center px-4 py-10">
       <div className="relative w-full max-w-6xl bg-white/90 dark:bg-slate-900/80 backdrop-blur rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden grid grid-cols-1 lg:grid-cols-2">
         {/* Decorative lines */}
         <div

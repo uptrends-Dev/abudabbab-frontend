@@ -2,35 +2,47 @@
 
 import { useEffect, useState } from "react";
 import { FaEnvelope, FaWhatsapp } from "react-icons/fa";
-
+import { Menu } from "lucide-react";
 import { exportExsl, getallBooking, getallTrips } from "../../../lib/apis/api";
 import { TRIPS_URL } from "@/paths";
+import { useMob } from "@/components/Provides/mobProvider";
 
+/* -------------------------------------------------- */
 
 export default function BookingsPage() {
-  const [trips, setTrips] = useState([])
+  const [trips, setTrips] = useState([]);
 
+  // search & filters
   const [q, setQ] = useState("");
   const [searchField, setSearchField] = useState("firstName");
   const [transferFilter, setTransferFilter] = useState("all");
   const [payment, setPaymentFilter] = useState("all");
   const [checkIn, setcheckInFilter] = useState("all");
   const [tripName, setTripNameFilter] = useState("");
-  const [sort, setSort] = useState("desc"); // NEW: خلي الافتراضي desc
+  const [sort, setSort] = useState("desc");
+
+  // pagination
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
+
+  // data
   const [allBookings, setAllBookings] = useState([]);
   const [totalBookings, setTotalBookings] = useState(0);
+
+  // modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
-  // filters
+
+  // date filters
   const [dateMode, setDateMode] = useState("none"); // none | day | month | year | range | lastDays
-  const [day, setDay] = useState(""); // YYYY-MM-DD
-  const [month, setMonth] = useState(""); // YYYY-MM
-  const [year, setYear] = useState(""); // YYYY
-  const [from, setFrom] = useState(""); // YYYY-MM-DD
-  const [to, setTo] = useState(""); // YYYY-MM-DD
-  const [lastDays, setLastDays] = useState(""); // number
+  const [day, setDay] = useState("");
+  const [month, setMonth] = useState("");
+  const [year, setYear] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [lastDays, setLastDays] = useState("");
+
+  const { isMobile, toggle } = useMob();
 
   const buildDateParams = () => {
     const p = {};
@@ -52,35 +64,27 @@ export default function BookingsPage() {
         if (lastDays) p.lastDays = lastDays;
         break;
       default:
-        // none
         break;
     }
     return p;
   };
 
-
   async function getTrips() {
     try {
-      const trip = await getallTrips(TRIPS_URL)
-      setTrips(trip)
-      // console.log(trip)
+      const trip = await getallTrips(TRIPS_URL);
+      setTrips(trip);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   }
-  // get trips for filter
+
   useEffect(() => {
-    try {
-      getTrips()
-    } catch (error) {
-      console.log(error)
-    }
+    getTrips();
   }, []);
-  // get all bookings
+
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        // بناء الـ query string بناءً على كل الفلاتر (بما فيها التاريخ)
         const params = {
           page,
           limit,
@@ -91,13 +95,12 @@ export default function BookingsPage() {
           payment,
           checkIn,
           tripName,
-          ...buildDateParams(), // NEW
+          ...buildDateParams(),
         };
 
-        const response = await getallBooking(params)
+        const response = await getallBooking(params);
 
         if (response.data.bookings?.length === 0 && page > 1) {
-          // اختياري: لو الصفحة الحالية فاضية ارجع لأول صفحة
           setPage(1);
         }
 
@@ -109,7 +112,6 @@ export default function BookingsPage() {
     };
 
     fetchBookings();
-    // NEW: زودنا توابع التاريخ في الـ deps
   }, [
     page,
     q,
@@ -130,19 +132,16 @@ export default function BookingsPage() {
   ]);
 
   const resetToFirst = () => setPage(1);
-
-  const totalPages = Math.max(1, Math.ceil(totalBookings / limit)); // اختياري: ما تنزلش عن 1
+  const totalPages = Math.max(1, Math.ceil(totalBookings / limit));
 
   const openModal = (booking) => {
     setSelectedBooking(booking);
     setIsModalOpen(true);
   };
-
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedBooking(null);
   };
-
 
   const clearDateFilters = () => {
     setDateMode("none");
@@ -155,178 +154,59 @@ export default function BookingsPage() {
     resetToFirst();
   };
 
-
-  const exportEx = async (allBookings) => {
-  try {
-    // Limit the number of bookings to 1000
-    const limitedBookings = allBookings.slice(0, 1000); 
-    
-    // Call the exportExsl function with the limited data
-    const data = await exportExsl(limitedBookings);
-
-    // Create a Blob from the response data
-    const blob = new Blob([data.data], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-
-    // Create a URL for the Blob
-    const url = URL.createObjectURL(blob);
-
-    // Create a link element to trigger the file download
-    const a = document.createElement("a");
-    a.href = url;
-
-    // Set the file name for download (if provided by the server)
-    a.download =
-      data.headers["content-disposition"]?.match(/filename="(.+)"/)?.[1] ??
-      "bookings.xlsx"; // Default to "bookings.xlsx" if no filename in headers
-
-    // Trigger the download by clicking the link
-    a.click();
-
-    // Clean up by revoking the object URL
-    URL.revokeObjectURL(url);
-  } catch (error) {
-    // Handle errors
-    console.error("Export error:", error);
-  }
-};
+  const exportEx = async (rows) => {
+    try {
+      const limited = rows.slice(0, 1000);
+      const data = await exportExsl(limited);
+      const blob = new Blob([data.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download =
+        data.headers["content-disposition"]?.match(/filename="(.+)"/)?.[1] ??
+        "bookings.xlsx";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Export error:", err);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-neutral-900 text-neutral-200">
+    <div className="min-h-screen bg-[#f7f8fb] text-slate-900">
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="sm:flex gap-4  items-center">
+        {/* Header */}
+        <div className="flex items-center gap-3 justify-between">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggle}
+              className="xl:hidden inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white hover:bg-slate-50"
+              aria-label="Open sidebar"
+            >
+              <Menu className="h-5 w-5 text-slate-600" />
+            </button>
+            <h1 className="text-xl sm:text-2xl font-semibold">
+              Bookings <span className="text-slate-500">• {totalBookings}</span>
+            </h1>
+          </div>
+
           <button
             onClick={() => exportEx(allBookings)}
-            className=" cursor-pointer rounded-xl border border-neutral-800 bg-blue-800/90 font-bold px-3 py-2 text-sm text-neutral-300 hover:bg-blue-800/75 transition duration-200"
+            className="cursor-pointer rounded-xl border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-medium text-sky-700 hover:bg-sky-100"
           >
             Export Excel
           </button>
-          <h1 className="text-lg font-semibold tracking-wide">
-            TOTAL BOOKINGS : {totalBookings}
-          </h1>
         </div>
-        {/* NEW — Date Filter */}
-        <div className="flex items-center gap-2 mt-7">
-          <span className="text-xs uppercase tracking-wide text-neutral-400">
-            date
-          </span>
 
-          <select
-            value={dateMode}
-            onChange={(e) => {
-              const v = e.target.value;
-              setDateMode(v);
-              setDay("");
-              setMonth("");
-              setYear("");
-              setFrom("");
-              setTo("");
-              setLastDays("");
-              resetToFirst();
-            }}
-            className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
-          >
-            <option value="none">All time</option>
-            <option value="day">Day</option>
-            <option value="month">Month</option>
-            <option value="year">Year</option>
-            <option value="range">Range</option>
-            <option value="lastDays">Last N days</option>
-          </select>
+        {/* Filters Card */}
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
 
-          {dateMode === "day" && (
-            <input
-              type="date"
-              value={day}
-              onChange={(e) => {
-                setDay(e.target.value);
-                resetToFirst();
-              }}
-              className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
-            />
-          )}
 
-          {dateMode === "month" && (
-            <input
-              type="month"
-              value={month}
-              onChange={(e) => {
-                setMonth(e.target.value);
-                resetToFirst();
-              }}
-              className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
-            />
-          )}
-
-          {dateMode === "year" && (
-            <input
-              type="number"
-              min="1970"
-              max="2100"
-              placeholder="YYYY"
-              value={year}
-              onChange={(e) => {
-                setYear(e.target.value);
-                resetToFirst();
-              }}
-              className="w-24 rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
-            />
-          )}
-
-          {dateMode === "range" && (
-            <>
-              <div className="">
-                <input
-                  type="date"
-                  value={from}
-                  onChange={(e) => {
-                    setFrom(e.target.value);
-                    resetToFirst();
-                  }}
-                  className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
-                  title="From (inclusive)"
-                />
-                <input
-                  type="date"
-                  value={to}
-                  onChange={(e) => {
-                    setTo(e.target.value);
-                    resetToFirst();
-                  }}
-                  className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
-                  title="To (inclusive)"
-                />
-              </div>
-            </>
-          )}
-
-          {dateMode === "lastDays" && (
-            <input
-              type="number"
-              min="1"
-              placeholder="e.g. 7"
-              value={lastDays}
-              onChange={(e) => {
-                setLastDays(e.target.value);
-                resetToFirst();
-              }}
-              className="w-24 rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
-            />
-          )}
-
-          <button
-            onClick={clearDateFilters}
-            className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-800/60"
-          >
-            Clear
-          </button>
-        </div>
-        {/* Controls (Redesigned) */}
-        <div className=" top-0 z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3">
           {/* Primary Row */}
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            {/* Left cluster: Search + Field */}
+            {/* Search + Field */}
             <div className="flex items-center gap-2 w-full md:max-w-xl">
               <div className="relative flex-1">
                 <input
@@ -335,12 +215,12 @@ export default function BookingsPage() {
                     setQ(e.target.value);
                     resetToFirst();
                   }}
-                  placeholder={`search by ${searchField}`}
-                  className="w-full rounded-xl border border-neutral-800 bg-neutral-900/60 px-10 py-2 text-sm placeholder-neutral-500 outline-none focus:ring-2 focus:ring-neutral-700"
+                  placeholder={`Search by ${searchField}`}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-10 py-2 text-sm placeholder-slate-400 outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-300"
                 />
                 <svg
                   viewBox="0 0 24 24"
-                  className="pointer-events-none absolute left-3 top-2.5 h-5 w-5 fill-neutral-500"
+                  className="pointer-events-none absolute left-3 top-2.5 h-5 w-5 fill-slate-400"
                 >
                   <path d="M10 2a8 8 0 105.3 14.1l4.3 4.3 1.4-1.4-4.3-4.3A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z" />
                 </svg>
@@ -354,14 +234,14 @@ export default function BookingsPage() {
                 }}
                 label="Field"
                 options={[
-                  { value: "firstName", label: "name" },
-                  { value: "phone", label: "phone" },
-                  { value: "email", label: "email" },
+                  { value: "firstName", label: "Name" },
+                  { value: "phone", label: "Phone" },
+                  { value: "email", label: "Email" },
                 ]}
               />
             </div>
 
-            {/* Right cluster: Pagination + Sort + Limit + Export */}
+            {/* Sort + Rows + Pager */}
             <div className="flex items-center gap-2 justify-between md:justify-end">
               <div className="hidden sm:flex items-center gap-2">
                 <SelectMini
@@ -396,7 +276,7 @@ export default function BookingsPage() {
                 <PageBtn disabled={page <= 1} onClick={() => setPage(page - 1)}>
                   Prev
                 </PageBtn>
-                <span className="text-sm text-neutral-400 whitespace-nowrap">
+                <span className="text-sm text-slate-500 whitespace-nowrap">
                   {page} / {totalPages}
                 </span>
                 <PageBtn
@@ -406,19 +286,13 @@ export default function BookingsPage() {
                   Next
                 </PageBtn>
               </div>
-
-              {/* <button
-                onClick={() => exportExsl(allBookings)}
-                className="rounded-lg border border-neutral-800 bg-blue-600/90 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600"
-              >
-                Export
-              </button> */}
             </div>
+
           </div>
 
-          {/* Quick chips row (reflect active filters) */}
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="text-xs uppercase tracking-wide text-neutral-400">
+          {/* Quick chips row */}
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span className="text-xs uppercase tracking-wide text-slate-500">
               filters
             </span>
 
@@ -454,31 +328,29 @@ export default function BookingsPage() {
                 resetToFirst();
               }}
             />
+
             {/* Date summary chip */}
             <FilterChip
               label={
                 dateMode === "none"
                   ? "Date: All time"
                   : dateMode === "day"
-                    ? `Date: ${day || "—"}`
-                    : dateMode === "month"
-                      ? `Month: ${month || "—"}`
-                      : dateMode === "year"
-                        ? `Year: ${year || "—"}`
-                        : dateMode === "range"
-                          ? `Range: ${from || "—"} → ${to || "—"}`
-                          : `Last ${lastDays || "—"} days`
+                  ? `Date: ${day || "—"}`
+                  : dateMode === "month"
+                  ? `Month: ${month || "—"}`
+                  : dateMode === "year"
+                  ? `Year: ${year || "—"}`
+                  : dateMode === "range"
+                  ? `Range: ${from || "—"} → ${to || "—"}`
+                  : `Last ${lastDays || "—"} days`
               }
               active={dateMode !== "none"}
-              onClear={() => {
-                clearDateFilters();
-              }}
+              onClear={clearDateFilters}
             />
 
-            <span className="mx-2 h-5 w-px bg-neutral-800" />
+            <span className="mx-2 h-5 w-px bg-slate-200" />
             <button
               onClick={() => {
-                // reset everything at once
                 setQ("");
                 setSearchField("firstName");
                 setTransferFilter("all");
@@ -490,14 +362,14 @@ export default function BookingsPage() {
                 clearDateFilters();
                 resetToFirst();
               }}
-              className="rounded-lg border border-neutral-800 bg-neutral-900/60 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800/60"
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
             >
               Reset all
             </button>
 
-            {/* Toggle more filters */}
+            {/* More filters */}
             <details className="ml-auto group">
-              <summary className="list-none inline-flex items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-900/60 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800/60 cursor-pointer">
+              <summary className="list-none inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 cursor-pointer">
                 More filters
                 <svg
                   className="h-4 w-4 transition-transform group-open:rotate-180"
@@ -512,9 +384,7 @@ export default function BookingsPage() {
                 </svg>
               </summary>
 
-              {/* Advanced row */}
               <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {/* Transfer */}
                 <SelectLabeled
                   label="Transfer"
                   value={transferFilter}
@@ -528,7 +398,6 @@ export default function BookingsPage() {
                     { value: "no", label: "No" },
                   ]}
                 />
-                {/* Payment */}
                 <SelectLabeled
                   label="Payment"
                   value={payment}
@@ -542,7 +411,6 @@ export default function BookingsPage() {
                     { value: "no", label: "No" },
                   ]}
                 />
-                {/* CheckIn */}
                 <SelectLabeled
                   label="Check in"
                   value={checkIn}
@@ -556,9 +424,10 @@ export default function BookingsPage() {
                     { value: "no", label: "No" },
                   ]}
                 />
-                {/* Trip */}
+
+                {/* Trip select */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs uppercase tracking-wide text-neutral-400">
+                  <label className="text-xs uppercase tracking-wide text-slate-500">
                     Trip
                   </label>
                   <select
@@ -567,7 +436,7 @@ export default function BookingsPage() {
                       setTripNameFilter(e.target.value);
                       resetToFirst();
                     }}
-                    className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-sky-100 focus:border-sky-300"
                   >
                     <option value="">All Trips</option>
                     {trips.map((e) => (
@@ -580,32 +449,146 @@ export default function BookingsPage() {
               </div>
             </details>
           </div>
+
+          {/* Date filter row */}
+          <div className="mt-4 flex items-center gap-2">
+            <span className="text-xs uppercase tracking-wide text-slate-500">
+              date
+            </span>
+
+            <select
+              value={dateMode}
+              onChange={(e) => {
+                const v = e.target.value;
+                setDateMode(v);
+                setDay("");
+                setMonth("");
+                setYear("");
+                setFrom("");
+                setTo("");
+                setLastDays("");
+                resetToFirst();
+              }}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-sky-100 focus:border-sky-300"
+            >
+              <option value="none">All time</option>
+              <option value="day">Day</option>
+              <option value="month">Month</option>
+              <option value="year">Year</option>
+              <option value="range">Range</option>
+              <option value="lastDays">Last N days</option>
+            </select>
+
+            {dateMode === "day" && (
+              <input
+                type="date"
+                value={day}
+                onChange={(e) => {
+                  setDay(e.target.value);
+                  resetToFirst();
+                }}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+              />
+            )}
+
+            {dateMode === "month" && (
+              <input
+                type="month"
+                value={month}
+                onChange={(e) => {
+                  setMonth(e.target.value);
+                  resetToFirst();
+                }}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+              />
+            )}
+
+            {dateMode === "year" && (
+              <input
+                type="number"
+                min="1970"
+                max="2100"
+                placeholder="YYYY"
+                value={year}
+                onChange={(e) => {
+                  setYear(e.target.value);
+                  resetToFirst();
+                }}
+                className="w-24 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+              />
+            )}
+
+            {dateMode === "range" && (
+              <>
+                <input
+                  type="date"
+                  value={from}
+                  onChange={(e) => {
+                    setFrom(e.target.value);
+                    resetToFirst();
+                  }}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                  title="From (inclusive)"
+                />
+                <input
+                  type="date"
+                  value={to}
+                  onChange={(e) => {
+                    setTo(e.target.value);
+                    resetToFirst();
+                  }}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                  title="To (inclusive)"
+                />
+              </>
+            )}
+
+            {dateMode === "lastDays" && (
+              <input
+                type="number"
+                min="1"
+                placeholder="e.g. 7"
+                value={lastDays}
+                onChange={(e) => {
+                  setLastDays(e.target.value);
+                  resetToFirst();
+                }}
+                className="w-24 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+              />
+            )}
+
+            <button
+              onClick={clearDateFilters}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+            >
+              Clear
+            </button>
+          </div>
+
+
         </div>
 
-        {/* Table */}
-        <div className="mt-6 overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-950/40">
+        {/* Table Card */}
+        <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="bg-neutral-900/50 text-neutral-400">
+              <thead className="bg-slate-50 text-slate-600">
                 <tr>
                   <Th>User name</Th>
-                  <Th>phone</Th>
+                  <Th>Phone</Th>
                   <Th>Trip name</Th>
-                  <Th>transfer</Th>
-                  <Th>Adult num</Th>
-                  <Th>child num</Th>
-                  <Th>booking date</Th>
+                  <Th>Transfer</Th>
+                  <Th>Adult</Th>
+                  <Th>Child</Th>
+                  <Th>Booking date</Th>
                   <Th>Created At</Th>
-                  <Th>more info</Th>
+                  <Th></Th>
                 </tr>
               </thead>
               <tbody>
                 {allBookings?.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={8}
-                      className="p-6 text-center text-neutral-400"
-                    >
+                    <td colSpan={9} className="p-6 text-center text-slate-500">
                       No results.
                     </td>
                   </tr>
@@ -613,30 +596,32 @@ export default function BookingsPage() {
                   allBookings?.map((r) => (
                     <tr
                       key={r._id}
-                      className="border-t border-neutral-800 hover:bg-neutral-900/40"
+                      className="border-t border-slate-200 hover:bg-slate-50/60"
                     >
                       <Td>{r.user.firstName}</Td>
-                      <Td className="whitespace-nowrap flex items-center gap-2">
-                        <a
-                          href={`https://wa.me/${"+20" + r.user.phone.replace(/\D/g, "")
-                            }`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-green-500 hover:text-green-400"
-                          title="Chat on WhatsApp"
-                        >
-                          <FaWhatsapp />
-                        </a>
-                        {r.user.phone}
+                      <Td className="whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={`https://wa.me/${"+20" + r.user.phone.replace(/\D/g, "")
+                              }`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-emerald-600 hover:text-emerald-500"
+                            title="WhatsApp"
+                          >
+                            <FaWhatsapp />
+                          </a>
+                          {r.user.phone}
+                        </div>
                       </Td>
                       <Td>{r?.tripInfo?.name}</Td>
                       <Td>
                         <span
                           className={[
-                            "inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium",
+                            "inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ring-1",
                             r.transportation === true
-                              ? "bg-emerald-600/20 text-emerald-300 ring-1 ring-emerald-700/40"
-                              : "bg-neutral-700/30 text-neutral-300 ring-1 ring-neutral-700/50",
+                              ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+                              : "bg-slate-50 text-slate-600 ring-slate-200",
                           ].join(" ")}
                         >
                           {r.transportation ? "Yes" : "No"}
@@ -660,10 +645,10 @@ export default function BookingsPage() {
                           minute: "2-digit",
                         })}
                       </Td>
-                      <Td className="px-4 py-4">
+                      <Td>
                         <button
                           onClick={() => openModal(r)}
-                          className="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                          className="px-3 py-1.5 rounded-lg border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100"
                         >
                           See More
                         </button>
@@ -676,181 +661,22 @@ export default function BookingsPage() {
           </div>
         </div>
 
-        {/* Modal */}
+        {/* Modal (light theme) */}
         {isModalOpen && selectedBooking && (
-          <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-50 grid place-items-center bg-black/30 backdrop-blur-[2px] p-4">
             <div
               role="dialog"
               aria-modal="true"
-              className="w-full max-w-5xl rounded-2xl bg-neutral-900 text-neutral-100 shadow-2xl ring-1 ring-white/10 overflow-hidden"
-            >
-              {/* Header ثابت */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-                <h2 className="text-xl sm:text-2xl font-semibold">
-                  Booking Details
-                </h2>
-                <button
-                  onClick={closeModal}
-                  className="inline-flex items-center gap-2 rounded-full px-4 py-2 bg-red-600 hover:bg-red-700 transition focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-neutral-900"
-                >
-                  Close
-                </button>
-              </div>
-
-              {/* جسم المودال مع أقصى ارتفاع + Scroll عام لو المحتوى كتير */}
-              <div className="px-6 py-5 max-h-[80vh] overflow-y-auto">
-                {/* Grid أنضف + نفس الارتفاع للكروت */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch auto-rows-fr">
-                  {/* ===== Card 1: User Information ===== */}
-                  <section className="h-full overflow-hidden rounded-2xl bg-white/80 text-neutral-900 ring-1 ring-black/5 shadow-sm flex flex-col">
-                    <header className="px-4 pt-4">
-                      <h3 className="text-lg font-semibold text-[#003cff]">
-                        User Information
-                      </h3>
-                    </header>
-                    {/* جزء المحتوى بيتمدّد ويعمل Scroll لو زاد */}
-                    <div className="px-4 pb-4 pt-2 space-y-2 grow overflow-y-auto">
-                      <p>
-                        <strong>Name:</strong> {selectedBooking.user.firstName}{" "}
-                        {selectedBooking.user.lastName}
-                      </p>
-
-                      <div className="flex items-center gap-2">
-                        <strong>Email:</strong>
-                        <a
-                          href={`mailto:${selectedBooking.user.email}`}
-                          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-500"
-                          title="Send email"
-                        >
-                          <FaEnvelope />
-                          <span className="underline">
-                            {selectedBooking.user.email}
-                          </span>
-                        </a>
-                      </div>
-
-                      <p>
-                        <strong>Phone:</strong> {selectedBooking.user.phone}
-                      </p>
-
-                      {/* اقصى 3 سطور علشان ما يطوّلاش الكارت */}
-                      <p
-                        title={selectedBooking.user.message}
-                        className="line-clamp-3"
-                      >
-                        <strong>Message:</strong> {selectedBooking.user.message}
-                      </p>
-                    </div>
-                  </section>
-
-                  {/* ===== Card 2: Trip Information ===== */}
-                  <section className="h-full overflow-hidden rounded-2xl bg-white/80 text-neutral-900 ring-1 ring-black/5 shadow-sm flex flex-col">
-                    <header className="px-4 pt-4">
-                      <h3 className="text-lg font-semibold text-[#003cff]">
-                        Trip Information
-                      </h3>
-                    </header>
-                    <div className="px-4 pb-4 pt-2 space-y-3 grow overflow-y-auto">
-                      <p>
-                        <strong>Trip Name:</strong>{" "}
-                        {selectedBooking.tripInfo?.name}
-                      </p>
-
-                      <p>
-                        <strong>Booking Date:</strong>{" "}
-                        {new Date(
-                          selectedBooking.bookingDate
-                        ).toLocaleDateString("en-GB", {
-                          timeZone: "Africa/Cairo",
-                        })}
-                      </p>
-
-                      {/* أسعار مرتبة في عمودين */}
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="rounded-xl bg-white/70 p-3 ring-1 ring-black/5">
-                          <p className="font-semibold">Adult Price</p>
-                          <ul className="text-sm mt-1 space-y-0.5">
-                            <li>
-                              EURO:{" "}
-                              {selectedBooking?.tripInfo?.prices?.adult?.euro} €
-                            </li>
-                            <li>
-                              EGP:{" "}
-                              {selectedBooking?.tripInfo?.prices?.adult?.egp}
-                            </li>
-                          </ul>
-                        </div>
-
-                        <div className="rounded-xl bg-white/70 p-3 ring-1 ring-black/5">
-                          <p className="font-semibold">Child Price</p>
-                          <ul className="text-sm mt-1 space-y-0.5">
-                            <li>
-                              EURO:{" "}
-                              {selectedBooking?.tripInfo?.prices?.child?.euro} €
-                            </li>
-                            <li>
-                              EGP:{" "}
-                              {selectedBooking?.tripInfo?.prices?.child?.egp}
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-
-                      <p>
-                        <strong>Transportation:</strong>{" "}
-                        {selectedBooking.transportation ? "Yes" : "No"}
-                      </p>
-                    </div>
-                  </section>
-
-                  {/* ===== Card 3: Booking Info ===== */}
-                  <section className="h-full overflow-hidden rounded-2xl bg-white/80 text-neutral-900 ring-1 ring-black/5 shadow-sm flex flex-col">
-                    <header className="px-4 pt-4">
-                      <h3 className="text-lg font-semibold text-[#003cff]">
-                        Booking Info
-                      </h3>
-                    </header>
-                    <div className="px-4 pb-4 pt-2 space-y-2 grow overflow-y-auto">
-                      <p>
-                        <strong>Trip Name:</strong>{" "}
-                        {selectedBooking.tripInfo?.name}
-                      </p>
-                      <p>
-                        <strong>Booking Date:</strong>{" "}
-                        {new Date(
-                          selectedBooking.bookingDate
-                        ).toLocaleDateString("en-GB", {
-                          timeZone: "Africa/Cairo",
-                        })}
-                      </p>
-                      <p>
-                        <strong>Transportation:</strong>{" "}
-                        {selectedBooking.transportation ? "Yes" : "No"}
-                      </p>
-                      {/* لو حابب تضيف أي ملاحظات/Status هنا */}
-                    </div>
-                  </section>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        {/* Modal */}
-        {isModalOpen && selectedBooking && (
-          <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm p-4">
-            <div
-              role="dialog"
-              aria-modal="true"
-              className="w-full max-w-5xl rounded-2xl bg-neutral-900 text-neutral-100 shadow-2xl ring-1 ring-white/10 overflow-hidden"
+              className="w-full max-w-5xl rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-slate-200 overflow-hidden"
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-gradient-to-r from-indigo-600 to-blue-500 text-white">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-sky-50 to-indigo-50">
                 <h2 className="text-xl sm:text-2xl font-semibold">
                   Booking Details
                 </h2>
                 <button
                   onClick={closeModal}
-                  className="inline-flex items-center gap-2 rounded-full px-4 py-2 bg-red-600 hover:bg-red-700 transition focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-neutral-900"
+                  className="inline-flex items-center gap-2 rounded-full px-4 py-2 border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
                 >
                   Close
                 </button>
@@ -858,30 +684,30 @@ export default function BookingsPage() {
 
               {/* Body */}
               <div className="px-6 py-5 max-h-[80vh] overflow-y-auto">
-                {/* Summary Row */}
-                <div className="mb-5 grid grid-cols-1 md:grid-cols-[160px,1fr,auto] gap-4 items-center">
+                {/* Summary row */}
+                <div className="mb-5 grid grid-cols-1 md:grid-cols-[180px,1fr,auto] gap-4 items-center">
                   <div className="space-y-1">
-                    <p className="text-sm text-neutral-300">Trip</p>
-                    <p className="text-lg font-semibold text-indigo-400">
+                    <p className="text-sm text-slate-500">Trip</p>
+                    <p className="text-lg font-semibold text-sky-700">
                       {selectedBooking?.tripInfo?.name ?? "—"}
                     </p>
                     <p className="text-sm">
-                      <span className="text-neutral-300">Booking Date:</span>{" "}
+                      <span className="text-slate-500">Booking Date:</span>{" "}
                       {selectedBooking?.bookingDate
                         ? new Date(
-                          selectedBooking.bookingDate
-                        ).toLocaleDateString("en-GB", {
-                          timeZone: "Africa/Cairo",
-                        })
+                            selectedBooking.bookingDate
+                          ).toLocaleDateString("en-GB", {
+                            timeZone: "Africa/Cairo",
+                          })
                         : "—"}
                     </p>
                     <p className="text-sm">
-                      <span className="text-neutral-300">Transportation:</span>{" "}
+                      <span className="text-slate-500">Transportation:</span>{" "}
                       <span
                         className={
                           selectedBooking?.transportation
-                            ? "text-green-400"
-                            : "text-red-400"
+                            ? "text-emerald-600"
+                            : "text-rose-600"
                         }
                       >
                         {selectedBooking?.transportation ? "Yes" : "No"}
@@ -889,192 +715,149 @@ export default function BookingsPage() {
                     </p>
                   </div>
 
-                  {/* Booking Stats */}
+                  {/* Stats */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    <div className="rounded-xl bg-white/10 px-3 py-2 text-center">
-                      <p className="text-xs text-neutral-300">Adults</p>
-                      <p className="text-base font-semibold text-blue-400">
-                        {selectedBooking?.adult ?? "—"}
-                      </p>
-                    </div>
-                    <div className="rounded-xl bg-white/10 px-3 py-2 text-center">
-                      <p className="text-xs text-neutral-300">Children</p>
-                      <p className="text-base font-semibold text-pink-400">
-                        {selectedBooking?.child ?? "—"}
-                      </p>
-                    </div>
-                    <div className="rounded-xl bg-white/10 px-3 py-2 text-center">
-                      <p className="text-xs text-neutral-300">Paid</p>
-                      <p className="text-base font-semibold text-green-500">
-                        {selectedBooking?.payment ? "Yes" : "No"}
-                      </p>
-                    </div>
-                    <div className="rounded-xl bg-white/10 px-3 py-2 text-center">
-                      <p className="text-xs text-neutral-300">Check In</p>
-                      <p className="text-base font-semibold text-yellow-500">
-                        {selectedBooking?.checkIn ? "Yes" : "No"}
-                      </p>
-                    </div>
+                    <Stat label="Adults" value={selectedBooking?.adult ?? "—"} />
+                    <Stat
+                      label="Children"
+                      value={selectedBooking?.child ?? "—"}
+                    />
+                    <Stat
+                      label="Paid"
+                      value={selectedBooking?.payment ? "Yes" : "No"}
+                    />
+                    <Stat
+                      label="Check In"
+                      value={selectedBooking?.checkIn ? "Yes" : "No"}
+                    />
                   </div>
                 </div>
 
-                {/* 3 Cards grid with equal height */}
+                {/* 3 equal-height cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch auto-rows-fr">
-                  {/* User Information */}
-                  <section className="h-full overflow-hidden rounded-2xl bg-white/10 text-gray-300 ring-1 ring-black/5 shadow-sm flex flex-col">
-                    <header className="px-4 pt-4 bg-gradient-to-r from-green-500 to-teal-400 text-white">
-                      <h3 className="text-lg font-semibold">
-                        User Information
-                      </h3>
-                    </header>
-                    <div className="px-4 pb-4 pt-2 space-y-2 grow overflow-y-auto">
-                      <p>
-                        <strong className="text-blue-500">Name:</strong>{" "}
-                        {(selectedBooking?.user?.firstName ?? "—") +
-                          " " +
-                          (selectedBooking?.user?.lastName ?? "")}
-                      </p>
+                  {/* User */}
+                  <LightCard title="User Information">
+                    <p>
+                      <strong>Name:</strong>{" "}
+                      {(selectedBooking?.user?.firstName ?? "—") +
+                        " " +
+                        (selectedBooking?.user?.lastName ?? "")}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <strong>Email:</strong>
+                      {selectedBooking?.user?.email ? (
+                        <a
+                          href={`mailto:${selectedBooking.user.email}`}
+                          className="inline-flex items-center gap-1 text-sky-700 hover:text-sky-600 underline"
+                          title="Send email"
+                        >
+                          <FaEnvelope />
+                          {selectedBooking.user.email}
+                        </a>
+                      ) : (
+                        <span>—</span>
+                      )}
+                    </div>
+                    <p>
+                      <strong>Phone:</strong>{" "}
+                      {selectedBooking?.user?.phone ?? "—"}
+                    </p>
+                    <p title={selectedBooking?.user?.message ?? ""} className="line-clamp-3">
+                      <strong>Message:</strong>{" "}
+                      {selectedBooking?.user?.message ?? "—"}
+                    </p>
+                  </LightCard>
 
-                      <div className="flex items-center gap-2">
-                        <strong className="text-blue-500">Email:</strong>
-                        {selectedBooking?.user?.email ? (
-                          <a
-                            href={`mailto:${selectedBooking.user.email}`}
-                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-500 underline"
-                            title="Send email"
-                          >
-                            {selectedBooking.user.email}
-                          </a>
-                        ) : (
-                          <span>—</span>
-                        )}
+                  {/* Trip */}
+                  <LightCard title="Trip Information">
+                    <p>
+                      <strong>Trip Name:</strong>{" "}
+                      {selectedBooking?.tripInfo?.name ?? "—"}
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
+                        <p className="font-semibold">Adult Price</p>
+                        <ul className="text-sm mt-1 space-y-0.5">
+                          <li>
+                            EURO:{" "}
+                            {selectedBooking?.tripInfo?.prices?.adult?.euro ??
+                              "—"}{" "}
+                            €
+                          </li>
+                          <li>
+                            EGP:{" "}
+                            {selectedBooking?.tripInfo?.prices?.adult?.egp ??
+                              "—"}
+                          </li>
+                        </ul>
                       </div>
 
-                      <p>
-                        <strong className="text-blue-500">Phone:</strong>{" "}
-                        {selectedBooking?.user?.phone ?? "—"}
-                      </p>
-
-                      <p
-                        title={selectedBooking?.user?.message ?? ""}
-                        className="line-clamp-3"
-                      >
-                        <strong className="text-blue-500">Message:</strong>{" "}
-                        {selectedBooking?.user?.message ?? "—"}
-                      </p>
-                    </div>
-                  </section>
-
-                  {/* Trip Information */}
-                  <section className="h-full overflow-hidden rounded-2xl bg-white/10 text-gray-300 ring-1 ring-black/5 shadow-sm flex flex-col">
-                    <header className="px-4 pt-4 bg-gradient-to-r from-yellow-500 to-orange-400 text-white">
-                      <h3 className="text-lg font-semibold">
-                        Trip Information
-                      </h3>
-                    </header>
-                    <div className="px-4 pb-4 pt-2 space-y-3 grow overflow-y-auto">
-                      <p>
-                        <strong className="text-yellow-400">Trip Name:</strong>{" "}
-                        {selectedBooking?.tripInfo?.name ?? "—"}
-                      </p>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="rounded-xl bg-white/10 p-3 ring-1 ring-black/5">
-                          <p className="font-semibold text-green-400">
-                            Adult Price
-                          </p>
-                          <ul className="text-sm mt-1 space-y-0.5">
-                            <li className="text-green-500">
-                              EURO:{" "}
-                              {selectedBooking?.tripInfo?.prices?.adult?.euro ??
-                                "—"}{" "}
-                              €
-                            </li>
-                            <li className="text-green-500">
-                              EGP:{" "}
-                              {selectedBooking?.tripInfo?.prices?.adult?.egp ??
-                                "—"}
-                            </li>
-                          </ul>
-                        </div>
-
-                        <div className="rounded-xl bg-white/10 p-3 ring-1 ring-black/5">
-                          <p className="font-semibold text-pink-400">
-                            Child Price
-                          </p>
-                          <ul className="text-sm mt-1 space-y-0.5">
-                            <li className="text-pink-500">
-                              EURO:{" "}
-                              {selectedBooking?.tripInfo?.prices?.child?.euro ??
-                                "—"}{" "}
-                              €
-                            </li>
-                            <li className="text-pink-500">
-                              EGP:{" "}
-                              {selectedBooking?.tripInfo?.prices?.child?.egp ??
-                                "—"}
-                            </li>
-                          </ul>
-                        </div>
+                      <div className="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
+                        <p className="font-semibold">Child Price</p>
+                        <ul className="text-sm mt-1 space-y-0.5">
+                          <li>
+                            EURO:{" "}
+                            {selectedBooking?.tripInfo?.prices?.child?.euro ??
+                              "—"}{" "}
+                            €
+                          </li>
+                          <li>
+                            EGP:{" "}
+                            {selectedBooking?.tripInfo?.prices?.child?.egp ??
+                              "—"}
+                          </li>
+                        </ul>
                       </div>
-
-                      <p>
-                        <strong className="text-yellow-500">
-                          Transportation:
-                        </strong>{" "}
-                        {selectedBooking?.transportation ? "Yes" : "No"}
-                      </p>
                     </div>
-                  </section>
 
-                  {/* Booking Info */}
-                  <section className="h-full overflow-hidden rounded-2xl bg-white/10 text-gray-300 ring-1 ring-black/5 shadow-sm flex flex-col">
-                    <header className="px-4 pt-4 bg-gradient-to-r from-pink-500 to-red-400 text-white">
-                      <h3 className="text-lg font-semibold">Booking Info</h3>
-                    </header>
-                    <div className="px-4 pb-4 pt-2 space-y-2 grow overflow-y-auto">
-                      <p>
-                        <strong className="text-pink-500">Adults:</strong>{" "}
-                        {selectedBooking?.adult ?? "—"}
-                      </p>
-                      <p>
-                        <strong className="text-pink-500">Children:</strong>{" "}
-                        {selectedBooking?.child ?? "—"}
-                      </p>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <p className="font-semibold text-red-400">
-                            Total (EURO)
-                          </p>
-                          <p>{selectedBooking?.totalPrice?.euro ?? "—"} €</p>
-                        </div>
-                        <div>
-                          <p className="font-semibold text-red-400">
-                            Total (EGP)
-                          </p>
-                          <p>{selectedBooking?.totalPrice?.egp ?? "—"}</p>
-                        </div>
+                    <p>
+                      <strong>Transportation:</strong>{" "}
+                      {selectedBooking?.transportation ? "Yes" : "No"}
+                    </p>
+                  </LightCard>
+
+                  {/* Booking */}
+                  <LightCard title="Booking Info">
+                    <p>
+                      <strong>Adults:</strong>{" "}
+                      {selectedBooking?.adult ?? "—"}
+                    </p>
+                    <p>
+                      <strong>Children:</strong>{" "}
+                      {selectedBooking?.child ?? "—"}
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <p className="font-semibold">Total (EURO)</p>
+                        <p>{selectedBooking?.totalPrice?.euro ?? "—"} €</p>
                       </div>
-                      <p>
-                        <strong className="text-red-400">Created:</strong>{" "}
-                        {selectedBooking?.createdAt
-                          ? new Date(selectedBooking.createdAt).toLocaleString(
-                            "en-GB",
-                            { timeZone: "Africa/Cairo" }
-                          )
-                          : "—"}
-                      </p>
-                      <p>
-                        <strong className="text-red-400">Updated:</strong>{" "}
-                        {selectedBooking?.updatedAt
-                          ? new Date(selectedBooking.updatedAt).toLocaleString(
-                            "en-GB",
-                            { timeZone: "Africa/Cairo" }
-                          )
-                          : "—"}
-                      </p>
+                      <div>
+                        <p className="font-semibold">Total (EGP)</p>
+                        <p>{selectedBooking?.totalPrice?.egp ?? "—"}</p>
+                      </div>
                     </div>
-                  </section>
+                    <p>
+                      <strong>Created:</strong>{" "}
+                      {selectedBooking?.createdAt
+                        ? new Date(
+                            selectedBooking.createdAt
+                          ).toLocaleString("en-GB", {
+                            timeZone: "Africa/Cairo",
+                          })
+                        : "—"}
+                    </p>
+                    <p>
+                      <strong>Updated:</strong>{" "}
+                      {selectedBooking?.updatedAt
+                        ? new Date(
+                            selectedBooking.updatedAt
+                          ).toLocaleString("en-GB", {
+                            timeZone: "Africa/Cairo",
+                          })
+                        : "—"}
+                    </p>
+                  </LightCard>
                 </div>
               </div>
             </div>
@@ -1085,43 +868,8 @@ export default function BookingsPage() {
   );
 }
 
+/* ---------------- components ---------------- */
 
-
-// ------------------------- bulider functions
-
-// function tripFilter() {
-//   trips.map((e) => {
-//     console.log(e.name);
-//     return ` <option value="${e?.name}">${e?.name}</option>`;
-//   });
-// }
-
-// const ExportToExcel = async () => {
-//   try {
-//     const arrayBuffer = await exportExsl(allBookings);
-//     const blob = new Blob([arrayBuffer], {
-//       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-//     });
-//     const url = URL.createObjectURL(blob);
-
-//     const a = document.createElement("a");
-//     a.href = url;
-//     a.download =
-//       res.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1] ??
-//       "bookings.xlsx";
-//     a.click();
-
-//     URL.revokeObjectURL(url);
-//   } catch (error) {
-//     console.error("Export error:", error);
-//   }
-// };
-
-
-
-
-
-// ------------------------- bulider components
 function Th({ children }) {
   return (
     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
@@ -1140,26 +888,27 @@ function PageBtn({ children, disabled, onClick }) {
       onClick={onClick}
       disabled={disabled}
       className={[
-        "h-9 rounded-lg px-3 text-sm font-medium",
+        "h-9 rounded-lg px-3 text-sm font-medium border",
         disabled
-          ? "bg-neutral-700 text-neutral-500 cursor-not-allowed"
-          : "bg-[#1c4521b3] text-gray-200 border-[#32c800] border-1 hover:bg-[#1c4521cc]",
+          ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
+          : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50",
       ].join(" ")}
     >
       {children}
     </button>
   );
 }
+
 function SelectMini({ value, onChange, options, label }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-xs uppercase tracking-wide text-neutral-400">
+      <span className="text-xs uppercase tracking-wide text-slate-500">
         {label}
       </span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-xs text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 focus:ring-2 focus:ring-sky-100 focus:border-sky-300"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -1174,13 +923,13 @@ function SelectMini({ value, onChange, options, label }) {
 function SelectLabeled({ value, onChange, options, label }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-xs uppercase tracking-wide text-neutral-400">
+      <label className="text-xs uppercase tracking-wide text-slate-500">
         {label}
       </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-sky-100 focus:border-sky-300"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -1196,22 +945,44 @@ function FilterChip({ label, active, onClear }) {
   return (
     <span
       className={[
-        "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs",
+        "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs ring-1",
         active
-          ? "bg-emerald-600/15 text-emerald-300 ring-1 ring-emerald-700/40"
-          : "bg-neutral-800/60 text-neutral-300 ring-1 ring-neutral-700/50",
+          ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+          : "bg-slate-50 text-slate-600 ring-slate-200",
       ].join(" ")}
     >
       {label}
       {active && (
         <button
           onClick={onClear}
-          className="rounded-md px-1.5 py-0.5 text-[10px] bg-neutral-900/70 hover:bg-neutral-800/70"
+          className="rounded-md px-1.5 py-0.5 text-[10px] bg-white hover:bg-slate-50 border border-slate-200"
           title="Clear"
         >
           ×
         </button>
       )}
     </span>
+  );
+}
+
+function Stat({ label, value }) {
+  return (
+    <div className="rounded-xl bg-slate-50 px-3 py-2 text-center ring-1 ring-slate-200">
+      <p className="text-xs text-slate-500">{label}</p>
+      <p className="text-base font-semibold text-slate-800">{value}</p>
+    </div>
+  );
+}
+
+function LightCard({ title, children }) {
+  return (
+    <section className="h-full overflow-hidden rounded-2xl bg-white text-slate-800 ring-1 ring-slate-200 shadow-sm flex flex-col">
+      <header className="px-4 pt-4">
+        <h3 className="text-lg font-semibold text-sky-700">{title}</h3>
+      </header>
+      <div className="px-4 pb-4 pt-2 space-y-2 grow overflow-y-auto">
+        {children}
+      </div>
+    </section>
   );
 }

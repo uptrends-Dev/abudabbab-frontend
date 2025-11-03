@@ -8,7 +8,7 @@ const CallBackLogOut = () => {
   async function onLogout() {
     try {
       await logout();
-      router.replace("/dashboard/login");
+      router.replace("/login");
       router.refresh();
     } catch (error) {
       console.error(error);

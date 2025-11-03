@@ -7,12 +7,13 @@ import {
   deleteCoupon,
   toggleCouponStatus,
 } from "../../../lib/apis/couponApi";
+import { useMob } from "@/components/Provides/mobProvider";
+import { Menu } from "lucide-react";
 
 /* ---------- Helpers ---------- */
 const toLocalDatetimeInput = (iso) => {
   if (!iso) return "";
   const d = new Date(iso);
-  // yyyy-MM-ddTHH:mm (بدون ثواني/ملي)
   const pad = (n) => n.toString().padStart(2, "0");
   const yyyy = d.getFullYear();
   const MM = pad(d.getMonth() + 1);
@@ -23,7 +24,6 @@ const toLocalDatetimeInput = (iso) => {
 };
 
 const fromLocalDatetimeInputToISO = (val) => {
-  // المتصفح بيرجّع قيمة local؛ هنحوّل لـ ISO
   if (!val) return "";
   const d = new Date(val);
   return d.toISOString();
@@ -72,6 +72,7 @@ const CouponTable = () => {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const { toggle } = useMob();
 
   useEffect(() => {
     fetchCoupons();
@@ -215,7 +216,6 @@ const CouponTable = () => {
     const normalized = normalizeCoupon(coupon);
     setEditCoupon({
       ...normalized,
-      // لخانة الإدخال الخاصّة بـ datetime-local
       expirationDate: toLocalDatetimeInput(normalized.expirationDate),
     });
     setError(null);
@@ -233,35 +233,48 @@ const CouponTable = () => {
   };
 
   return (
-    <div className="bg-neutral-900 text-zinc-100">
+    <div className="bg-white text-neutral-900">
       <main className="p-6 max-w-7xl mx-auto min-h-screen">
         <div className="mb-6 flex justify-between items-center">
-          <h1 className="text-lg sm:text-xl font-semibold">Coupon Management</h1>
-          <div className="flex items-center gap-2">
+          <div className="flex gap-2 justify-center items-center">
+            <button
+              onClick={toggle}
+              className="xl:hidden inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white hover:bg-slate-50"
+              aria-label="Open sidebar"
+            >
+              <Menu className="h-5 w-5 text-slate-600" />
+            </button>
+            <h1 className="text-lg sm:text-xl font-semibold">
+              Coupons
+            </h1>
+          </div>
+          <div className="flex flex-row   gap-2">
             <button
               onClick={fetchCoupons}
               disabled={loading}
-              className="px-4 py-2 rounded-xl border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 disabled:opacity-60 text-sm font-medium"
+              className="px-4 py-2 rounded-xl border border-neutral-300 bg-white hover:bg-neutral-50 disabled:opacity-60 text-sm font-medium"
             >
               {loading ? "Refreshing..." : "Refresh"}
             </button>
             <button
               onClick={handleOpenAddModal}
-              className="px-4 py-2 rounded-xl border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-sm font-medium"
+              className="px-4 py-2 rounded-xl border border-neutral-300 bg-white hover:bg-neutral-50 text-sm font-medium"
             >
-              + Add New Coupon
+              + Add 
             </button>
           </div>
         </div>
 
         {error && (
-          <div className="mb-4 p-4 bg-red-600 text-white rounded-lg">{error}</div>
+          <div className="mb-4 p-4 bg-red-600 text-white rounded-lg">
+            {error}
+          </div>
         )}
 
-        <div className="overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-950/40">
+        <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="bg-neutral-900/50 text-neutral-400">
+              <thead className="bg-neutral-50 text-neutral-600">
                 <tr>
                   <Th>Code</Th>
                   <Th>Type</Th>
@@ -274,13 +287,19 @@ const CouponTable = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="p-6 text-center text-neutral-400">
+                    <td
+                      colSpan={6}
+                      className="p-6 text-center text-neutral-500"
+                    >
                       Loading...
                     </td>
                   </tr>
                 ) : coupons.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="p-6 text-center text-neutral-400">
+                    <td
+                      colSpan={6}
+                      className="p-6 text-center text-neutral-500"
+                    >
                       No coupons found
                     </td>
                   </tr>
@@ -288,15 +307,15 @@ const CouponTable = () => {
                   coupons.map((coupon) => (
                     <tr
                       key={coupon._id ?? coupon.code}
-                      className="border-t border-neutral-800 hover:bg-neutral-900/40"
+                      className="border-t border-neutral-200 hover:bg-neutral-50"
                     >
                       <Td className="font-mono break-all">{coupon.code}</Td>
                       <Td>
                         <span
                           className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ring-1 ${
                             coupon.type === "amount"
-                              ? "bg-blue-600/25 text-blue-300 ring-blue-500/40"
-                              : "bg-green-600/25 text-green-300 ring-green-500/40"
+                              ? "bg-blue-600/10 text-blue-700 ring-blue-600/20"
+                              : "bg-green-600/10 text-green-700 ring-green-600/20"
                           }`}
                         >
                           {coupon.type}
@@ -309,7 +328,10 @@ const CouponTable = () => {
                             <div>EUR: {coupon?.discount?.euro ?? 0}</div>
                           </div>
                         ) : (
-                          `${coupon?.discount?.percent ?? safeNum(coupon?.discount)}%`
+                          `${
+                            coupon?.discount?.percent ??
+                            safeNum(coupon?.discount)
+                          }%`
                         )}
                       </Td>
                       <Td className="whitespace-nowrap">
@@ -321,8 +343,8 @@ const CouponTable = () => {
                         <span
                           className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ring-1 ${
                             coupon.active
-                              ? "bg-emerald-600/25 text-emerald-300 ring-emerald-500/40"
-                              : "bg-rose-600/25 text-rose-300 ring-rose-500/40"
+                              ? "bg-emerald-600/10 text-emerald-700 ring-emerald-600/20"
+                              : "bg-rose-600/10 text-rose-700 ring-rose-600/20"
                           }`}
                         >
                           {coupon.active ? "Active" : "Inactive"}
@@ -367,25 +389,36 @@ const CouponTable = () => {
       {/* Add Coupon Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-semibold">Add New Coupon</h2>
-              <button onClick={closeAdd} className="text-zinc-400 hover:text-zinc-100 text-2xl">
+              <button
+                onClick={closeAdd}
+                className="text-neutral-500 hover:text-neutral-800 text-2xl"
+              >
                 ×
               </button>
             </div>
 
-            {error && <div className="mb-4 p-3 bg-red-600 text-white rounded-md">{error}</div>}
+            {error && (
+              <div className="mb-4 p-3 bg-red-600 text-white rounded-md">
+                {error}
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Coupon Code</label>
+                <label className="block text-sm font-medium mb-2">
+                  Coupon Code
+                </label>
                 <input
                   type="text"
                   value={newCoupon.code}
-                  onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value })}
+                  onChange={(e) =>
+                    setNewCoupon({ ...newCoupon, code: e.target.value })
+                  }
                   placeholder="Enter coupon code"
-                  className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-100 focus:border-blue-500 focus:outline-none"
+                  className="w-full p-3 bg-white border border-neutral-300 rounded-md text-neutral-900 focus:border-blue-500 focus:outline-none"
                 />
               </div>
 
@@ -394,17 +427,21 @@ const CouponTable = () => {
                 <select
                   value={newCoupon.type}
                   onChange={(e) => {
-                    const type = e.target.value ;
+                    const type = e.target.value;
                     setNewCoupon({
                       ...newCoupon,
                       type,
                       discount:
                         type === "amount"
                           ? { ...newCoupon.discount, percent: "" }
-                          : { egp: "", euro: "", percent: newCoupon.discount.percent || "" },
+                          : {
+                              egp: "",
+                              euro: "",
+                              percent: newCoupon.discount.percent || "",
+                            },
                     });
                   }}
-                  className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-100 focus:border-blue-500 focus:outline-none"
+                  className="w-full p-3 bg-white border border-neutral-300 rounded-md text-neutral-900 focus:border-blue-500 focus:outline-none"
                 >
                   <option value="amount">Amount</option>
                   <option value="percent">Percentage</option>
@@ -416,39 +453,51 @@ const CouponTable = () => {
               {newCoupon.type === "amount" ? (
                 <>
                   <div>
-                    <label className="block text-sm font-medium mb-2">EGP Amount</label>
+                    <label className="block text-sm font-medium mb-2">
+                      EGP Amount
+                    </label>
                     <input
                       type="number"
                       value={newCoupon.discount.egp}
                       onChange={(e) =>
                         setNewCoupon({
                           ...newCoupon,
-                          discount: { ...newCoupon.discount, egp: e.target.value },
+                          discount: {
+                            ...newCoupon.discount,
+                            egp: e.target.value,
+                          },
                         })
                       }
                       placeholder="Enter EGP amount"
-                      className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-100 focus:border-blue-500 focus:outline-none"
+                      className="w-full p-3 bg-white border border-neutral-300 rounded-md text-neutral-900 focus:border-blue-500 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Euro Amount</label>
+                    <label className="block text-sm font-medium mb-2">
+                      Euro Amount
+                    </label>
                     <input
                       type="number"
                       value={newCoupon.discount.euro}
                       onChange={(e) =>
                         setNewCoupon({
                           ...newCoupon,
-                          discount: { ...newCoupon.discount, euro: e.target.value },
+                          discount: {
+                            ...newCoupon.discount,
+                            euro: e.target.value,
+                          },
                         })
                       }
                       placeholder="Enter Euro amount"
-                      className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-100 focus:border-blue-500 focus:outline-none"
+                      className="w-full p-3 bg-white border border-neutral-300 rounded-md text-neutral-900 focus:border-blue-500 focus:outline-none"
                     />
                   </div>
                 </>
               ) : (
                 <div>
-                  <label className="block text-sm font-medium mb-2">Percentage</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Percentage
+                  </label>
                   <input
                     type="number"
                     min={0}
@@ -457,23 +506,31 @@ const CouponTable = () => {
                     onChange={(e) =>
                       setNewCoupon({
                         ...newCoupon,
-                        discount: { egp: "", euro: "", percent: e.target.value },
+                        discount: {
+                          egp: "",
+                          euro: "",
+                          percent: e.target.value,
+                        },
                       })
                     }
                     placeholder="Enter percentage (0-100)"
-                    className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-100 focus:border-blue-500 focus:outline-none"
+                    className="w-full p-3 bg-white border border-neutral-300 rounded-md text-neutral-900 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
               )}
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Expiration Date</label>
+              <label className="block text-sm font-medium mb-2">
+                Expiration Date
+              </label>
               <input
                 type="datetime-local"
                 value={newCoupon.expirationDate}
-                onChange={(e) => setNewCoupon({ ...newCoupon, expirationDate: e.target.value })}
-                className="w-full p-3 bg-gray-700 border border-gray-600 rounded-md text-white focus:border-blue-500 focus:outline-none"
+                onChange={(e) =>
+                  setNewCoupon({ ...newCoupon, expirationDate: e.target.value })
+                }
+                className="w-full p-3 bg-white border border-neutral-300 rounded-md text-neutral-900 focus:border-blue-500 focus:outline-none"
               />
             </div>
 
@@ -482,7 +539,9 @@ const CouponTable = () => {
                 type="checkbox"
                 id="active"
                 checked={newCoupon.active}
-                onChange={(e) => setNewCoupon({ ...newCoupon, active: e.target.checked })}
+                onChange={(e) =>
+                  setNewCoupon({ ...newCoupon, active: e.target.checked })
+                }
                 className="mr-3 w-4 h-4"
               />
               <label htmlFor="active" className="text-sm font-medium">
@@ -494,13 +553,13 @@ const CouponTable = () => {
               <button
                 onClick={handleAddCoupon}
                 disabled={loading}
-                className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-zinc-600 rounded-md text-white font-semibold transition-colors"
+                className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-neutral-400 rounded-md text-white font-semibold transition-colors"
               >
                 {loading ? "Adding..." : "Add Coupon"}
               </button>
               <button
                 onClick={closeAdd}
-                className="flex-1 px-6 py-3 bg-zinc-700 hover:bg-zinc-600 rounded-md text-zinc-100 font-semibold transition-colors"
+                className="flex-1 px-6 py-3 bg-neutral-200 hover:bg-neutral-300 rounded-md text-neutral-900 font-semibold transition-colors"
               >
                 Cancel
               </button>
@@ -512,25 +571,36 @@ const CouponTable = () => {
       {/* Edit Coupon Modal */}
       {showEditModal && editCoupon && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-semibold">Edit Coupon</h2>
-              <button onClick={closeEdit} className="text-zinc-400 hover:text-zinc-100 text-2xl">
+              <button
+                onClick={closeEdit}
+                className="text-neutral-500 hover:text-neutral-800 text-2xl"
+              >
                 ×
               </button>
             </div>
 
-            {error && <div className="mb-4 p-3 bg-red-600 text-white rounded-md">{error}</div>}
+            {error && (
+              <div className="mb-4 p-3 bg-red-600 text-white rounded-md">
+                {error}
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Coupon Code</label>
+                <label className="block text-sm font-medium mb-2">
+                  Coupon Code
+                </label>
                 <input
                   type="text"
                   value={editCoupon.code}
-                  onChange={(e) => setEditCoupon({ ...editCoupon, code: e.target.value })}
+                  onChange={(e) =>
+                    setEditCoupon({ ...editCoupon, code: e.target.value })
+                  }
                   placeholder="Enter coupon code"
-                  className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-100 focus:border-blue-500 focus:outline-none"
+                  className="w-full p-3 bg-white border border-neutral-300 rounded-md text-neutral-900 focus:border-blue-500 focus:outline-none"
                 />
               </div>
 
@@ -539,17 +609,20 @@ const CouponTable = () => {
                 <select
                   value={editCoupon.type}
                   onChange={(e) => {
-                    const type = e.target.value ;
+                    const type = e.target.value;
                     setEditCoupon((prev) => ({
                       ...prev,
                       type,
                       discount:
                         type === "amount"
-                          ? { egp: prev.discount?.egp ?? "", euro: prev.discount?.euro ?? "" }
+                          ? {
+                              egp: prev.discount?.egp ?? "",
+                              euro: prev.discount?.euro ?? "",
+                            }
                           : { percent: prev.discount?.percent ?? "" },
                     }));
                   }}
-                  className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-100 focus:border-blue-500 focus:outline-none"
+                  className="w-full p-3 bg-white border border-neutral-300 rounded-md text-neutral-900 focus:border-blue-500 focus:outline-none"
                 >
                   <option value="amount">Amount</option>
                   <option value="percent">Percentage</option>
@@ -561,39 +634,51 @@ const CouponTable = () => {
               {editCoupon.type === "amount" ? (
                 <>
                   <div>
-                    <label className="block text-sm font-medium mb-2">EGP Amount</label>
+                    <label className="block text-sm font-medium mb-2">
+                      EGP Amount
+                    </label>
                     <input
                       type="number"
                       value={editCoupon.discount?.egp ?? ""}
                       onChange={(e) =>
                         setEditCoupon({
                           ...editCoupon,
-                          discount: { ...editCoupon.discount, egp: e.target.value },
+                          discount: {
+                            ...editCoupon.discount,
+                            egp: e.target.value,
+                          },
                         })
                       }
                       placeholder="Enter EGP amount"
-                      className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-100 focus:border-blue-500 focus:outline-none"
+                      className="w-full p-3 bg-white border border-neutral-300 rounded-md text-neutral-900 focus:border-blue-500 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Euro Amount</label>
+                    <label className="block text-sm font-medium mb-2">
+                      Euro Amount
+                    </label>
                     <input
                       type="number"
                       value={editCoupon.discount?.euro ?? ""}
                       onChange={(e) =>
                         setEditCoupon({
                           ...editCoupon,
-                          discount: { ...editCoupon.discount, euro: e.target.value },
+                          discount: {
+                            ...editCoupon.discount,
+                            euro: e.target.value,
+                          },
                         })
                       }
                       placeholder="Enter Euro amount"
-                      className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-100 focus:border-blue-500 focus:outline-none"
+                      className="w-full p-3 bg-white border border-neutral-300 rounded-md text-neutral-900 focus:border-blue-500 focus:outline-none"
                     />
                   </div>
                 </>
               ) : (
                 <div>
-                  <label className="block text-sm font-medium mb-2">Percentage</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Percentage
+                  </label>
                   <input
                     type="number"
                     min={0}
@@ -606,21 +691,26 @@ const CouponTable = () => {
                       })
                     }
                     placeholder="Enter percentage (0-100)"
-                    className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-100 focus:border-blue-500 focus:outline-none"
+                    className="w-full p-3 bg-white border border-neutral-300 rounded-md text-neutral-900 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
               )}
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Expiration Date</label>
+              <label className="block text-sm font-medium mb-2">
+                Expiration Date
+              </label>
               <input
                 type="datetime-local"
                 value={editCoupon.expirationDate || ""}
                 onChange={(e) =>
-                  setEditCoupon({ ...editCoupon, expirationDate: e.target.value })
+                  setEditCoupon({
+                    ...editCoupon,
+                    expirationDate: e.target.value,
+                  })
                 }
-                className="w-full p-3 bg-gray-700 border border-gray-600 rounded-md text-white focus:border-blue-500 focus:outline-none"
+                className="w-full p-3 bg-white border border-neutral-300 rounded-md text-neutral-900 focus:border-blue-500 focus:outline-none"
               />
             </div>
 
@@ -629,7 +719,9 @@ const CouponTable = () => {
                 type="checkbox"
                 id="editActive"
                 checked={!!editCoupon.active}
-                onChange={(e) => setEditCoupon({ ...editCoupon, active: e.target.checked })}
+                onChange={(e) =>
+                  setEditCoupon({ ...editCoupon, active: e.target.checked })
+                }
                 className="mr-3 w-4 h-4"
               />
               <label htmlFor="editActive" className="text-sm font-medium">
@@ -640,18 +732,22 @@ const CouponTable = () => {
             <div className="flex space-x-4">
               <button
                 onClick={() => {
-                  // رجّع قيمة datetime-local إلى ISO قبل الإرسال
-                  const iso = fromLocalDatetimeInputToISO(editCoupon.expirationDate);
-                  handleUpdateCoupon(editCoupon._id, (editCoupon.expirationDate = iso));
+                  const iso = fromLocalDatetimeInputToISO(
+                    editCoupon.expirationDate
+                  );
+                  handleUpdateCoupon(
+                    editCoupon._id,
+                    (editCoupon.expirationDate = iso)
+                  );
                 }}
                 disabled={loading}
-                className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-zinc-600 rounded-md text-white font-semibold transition-colors"
+                className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-neutral-400 rounded-md text-white font-semibold transition-colors"
               >
                 {loading ? "Updating..." : "Update Coupon"}
               </button>
               <button
                 onClick={closeEdit}
-                className="flex-1 px-6 py-3 bg-zinc-700 hover:bg-zinc-600 rounded-md text-zinc-100 font-semibold transition-colors"
+                className="flex-1 px-6 py-3 bg-neutral-200 hover:bg-neutral-300 rounded-md text-neutral-900 font-semibold transition-colors"
               >
                 Cancel
               </button>
@@ -664,7 +760,7 @@ const CouponTable = () => {
 };
 
 /* ---------- Small table cells ---------- */
-function Th({ children } ) {
+function Th({ children }) {
   return (
     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
       {children}
