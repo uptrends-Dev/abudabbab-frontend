@@ -3,18 +3,37 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect } from "react";
-import { LogOut, Settings, LayoutGrid, CircleX } from "lucide-react";
+import {
+  LogOut,
+  Settings,
+  LayoutGrid,
+  CircleX,
+  ChartSpline,
+  KeyboardMusic,
+  Tickets,
+  Users,
+  Ticket,
+  DoorClosedLocked,
+} from "lucide-react";
 import { logout } from "../../lib/apis/authApi";
 import { whoisme } from "../../lib/apis/api";
 import { useMob } from "../Provides/mobProvider";
 
 const ALL_TABS = [
-  { label: "Advanced Statistics", path: "/dashboard/advancedInfos" },
-  { label: "Control Trips", path: "/dashboard/controlTrips" },
-  { label: "Bookings", path: "/dashboard/bookings" },
-  { label: "Users", path: "/dashboard/users" },
-  { label: "Coupons", path: "/dashboard/coupons" },
-  { label: "Gate", path: "/dashboard/gate" },
+  {
+    icon: <ChartSpline />,
+    label: "Advanced Statistics",
+    path: "/dashboard/advancedInfos",
+  },
+  {
+    icon: <KeyboardMusic />,
+    label: "Control Trips",
+    path: "/dashboard/controlTrips",
+  },
+  { icon: <Tickets />, label: "Bookings", path: "/dashboard/bookings" },
+  { icon: <Users />, label: "Users", path: "/dashboard/users" },
+  { icon: <Ticket />, label: "Coupons", path: "/dashboard/coupons" },
+  { icon: <DoorClosedLocked />, label: "Gate", path: "/dashboard/gate" },
 ];
 
 function tabsForRole(role) {
@@ -22,9 +41,13 @@ function tabsForRole(role) {
     case "SUPER_ADMIN":
       return ALL_TABS;
     case "FINANCE":
-      return ALL_TABS.filter((t) => ["Advanced Statistics", "Bookings"].includes(t.label));
+      return ALL_TABS.filter((t) =>
+        ["Advanced Statistics", "Bookings"].includes(t.label)
+      );
     case "ADMIN":
-      return ALL_TABS.filter((t) => !["Advanced Statistics", "Gate"].includes(t.label));
+      return ALL_TABS.filter(
+        (t) => !["Advanced Statistics", "Gate"].includes(t.label)
+      );
     case "EMPLOYEE":
       return ALL_TABS.filter((t) => t.label === "Bookings");
     case "GATE":
@@ -82,7 +105,9 @@ const AdminSidebar = () => {
       <div
         onClick={close}
         className={`fixed inset-0 bg-black/40 z-40 md:hidden transition-opacity ${
-          isMobile ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          isMobile
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
         }`}
       />
 
@@ -91,7 +116,7 @@ const AdminSidebar = () => {
         className={`
           fixed md:fixed top-0 left-0
           h-screen md:h-screen
-          z-50 w-[280px] md:w-[400px]
+          z-50 w-[280px] md:w-[350px]
           overflow-y-auto overscroll-contain
           transition-transform duration-300
           ${isMobile ? "translate-x-0" : "-translate-x-full xl:translate-x-0"}
@@ -102,31 +127,37 @@ const AdminSidebar = () => {
           {/* Brand + Close (موبايل) */}
           <div className="px-4 py-3 border-b border-zinc-200 flex items-center gap-3">
             <div>
-              <img src="/AbuDabbabLogo.svg" className="w-32 h-auto" alt="AbuDabbabLogo" />
+              <img
+                src="/AbuDabbabLogo.svg"
+                className="w-32 h-auto"
+                alt="AbuDabbabLogo"
+              />
             </div>
             <button
               onClick={close}
               className="ml-auto xl:hidden inline-flex items-center gap-2 rounded-lg cursor-pointer px-3 py-1.5 text-sm"
             >
-             <CircleX />
+              <CircleX />
             </button>
           </div>
 
           {/* user card */}
           <div className="px-4 py-3">
-            <div className="rounded-xl border border-zinc-200 bg-white p-3 shadow-sm">
+            <div className="rounded-xl border border-zinc-200 bg-blue p-3 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-full bg-zinc-100 grid place-items-center">
-                  <LayoutGrid className="h-4 w-4 text-zinc-500" />
+                  <LayoutGrid className="h-4 w-4 text-orange-500" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm font-medium text-zinc-900 truncate">{username}</div>
-                  <div className="text-xs text-zinc-500 truncate">{role}</div>
+                  <div className="text-sm font-medium text-white truncate">
+                    {username}
+                  </div>
+                  <div className="text-xs text-gray-200 truncate">{role}</div>
                 </div>
                 {role === "SUPER_ADMIN" && (
                   <button
                     onClick={() => router.push("/dashboard/settings")}
-                    className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 hover:bg-zinc-50"
+                    className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-200 cursor-pointer hover:bg-zinc-50"
                     aria-label="Settings"
                   >
                     <Settings className="h-4 w-4 text-zinc-600" />
@@ -138,24 +169,34 @@ const AdminSidebar = () => {
 
           {/* nav */}
           <nav className="px-3 pt-1 space-y-1 flex-1">
-            <div className="px-2 text-[11px] uppercase tracking-wide text-zinc-500">Navigation</div>
+            <div className="px-2 text-[11px] uppercase tracking-wide text-zinc-500">
+              Navigation
+            </div>
             {visibleTabs.map((tab) => {
               const isActive = pathname === tab.path;
               return (
-                <Link key={tab.label} href={tab.path} className="block" onClick={close}>
+                <Link
+                  key={tab.label}
+                  href={tab.path}
+                  className="block"
+                  onClick={close}
+                >
                   <div
                     aria-current={isActive ? "page" : undefined}
                     className={`mt-1 flex items-center gap-3 rounded-xl border px-3 py-2 text-sm transition-all ${
                       isActive
-                        ? "border-blue-200 bg-blue-50/80 text-blue-700"
+                        ? "border-blue-200 bg-blue-50/80 text-blue"
                         : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"
                     }`}
                   >
-                    <span
+                    {/* <span
                       className={`h-2 w-2 rounded-full ${
                         isActive ? "bg-blue-600" : "bg-zinc-300"
                       }`}
-                    />
+                    /> */}
+                    <span className="text-white  p-2 rounded-full  bg-blue ">
+                      {tab.icon}
+                    </span>
                     <span className="truncate">{tab.label}</span>
                   </div>
                 </Link>
