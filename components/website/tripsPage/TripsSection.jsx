@@ -25,12 +25,27 @@ export default function TripsSection() {
 
   // UPDATED: only active trips
   const visibleTrips = useMemo(
-    () => (Array.isArray(trips) ? trips.filter((t) => t?.isActive === true) : []),
+    () =>
+      Array.isArray(trips) ? trips.filter((t) => t?.isActive === true) : [],
     [trips]
   );
 
-  if (loading) return <div className="loader" />;
+  // if (loading)
+  //   return (
 
+  //   );
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45 } },
+};
   return (
     <section id="trips" className="bg-main py-16 overflow-hidden ">
       <div className="mx-auto max-w-7xl px-6 text-center lg:px-8 overflow-hidden">
@@ -51,7 +66,7 @@ export default function TripsSection() {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5 }}
         >
-          <span className="text-orange">Find Your Trip</span> 
+          <span className="text-orange">Find Your Trip</span>
         </motion.h2>
 
         <motion.p
@@ -64,10 +79,30 @@ export default function TripsSection() {
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
           eiusmod tempor incididunt ut labore et dolore magna aliqua.
         </motion.p>
+     {/* حالة التحميل */}
+        {loading && (
+          <motion.div
+            className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none pb-2 max-w-7xl m-auto"
+            initial="hidden"
+            animate="show"
+            variants={container}
+          >
+            {Array.from({ length: 3 }).map(
+              (_, idx) => (
+                <motion.div key={idx} variants={item}>
+                  <SkeletonTripCard />
+                </motion.div>
+              )
+            )}
+          </motion.div>
+        )}
 
+        
         {/* UPDATED: empty state when no active trips */}
         {visibleTrips.length === 0 ? (
-          <div className="mt-10 text-sm text-slate-500">No active trips right now.</div>
+          <div className="mt-10 text-sm text-slate-500">
+            No active trips right now.
+          </div>
         ) : (
           <motion.div
             className="
@@ -84,7 +119,7 @@ export default function TripsSection() {
             {/* UPDATED: map over visibleTrips only */}
             {visibleTrips.map((t) => (
               <div
-                key={t?._id} 
+                key={t?._id}
                 className="
                   group relative max-w-sm rounded-[12px] overflow-hidden bg-white shadow-lg ring-1 ring-slate-200/70
                   transition-all duration-500 motion-reduce:transition-none
@@ -117,7 +152,8 @@ export default function TripsSection() {
                     "
                   >
                     <span className="rounded-lg bg-white/90 px-3 py-1 text-[11px] font-medium text-slate-800 ring-1 ring-slate-200 backdrop-blur">
-                      {t?.tripTime?.from ?? "--"} – {t?.tripTime?.to ?? "--"} {/* UPDATED */}
+                      {t?.tripTime?.from ?? "--"} – {t?.tripTime?.to ?? "--"}{" "}
+                      {/* UPDATED */}
                     </span>
                   </div>
                 </div>
@@ -129,7 +165,9 @@ export default function TripsSection() {
 
                   <div className="flex items-center mt-2">
                     <span className="text-yellow-500 text-xs">★★★★★</span>
-                    <span className="ml-2 text-xs text-gray-500">(650+ Ratings)</span>
+                    <span className="ml-2 text-xs text-gray-500">
+                      (650+ Ratings)
+                    </span>
                   </div>
 
                   <div className="flex justify-end items-center mt-4 gap-2">
@@ -139,9 +177,12 @@ export default function TripsSection() {
                         group-hover:-translate-y-0.5 group-hover:text-gray-900 
                       "
                     >
-                      €{t?.prices?.adult?.euro ?? "--"} {/* UPDATED: safe access + € */}
+                      €{t?.prices?.adult?.euro ?? "--"}{" "}
+                      {/* UPDATED: safe access + € */}
                     </span>
-                    <Link href={`/home/trip/${t?._id ?? ""}`}> {/* UPDATED: safe href */}
+                    <Link href={`/home/trip/${t?._id ?? ""}`}>
+                      {" "}
+                      {/* UPDATED: safe href */}
                       <button
                         className="
                           relative bg-orange-500 text-white py-2 px-4 rounded-[10px]
@@ -166,5 +207,60 @@ export default function TripsSection() {
         )}
       </div>
     </section>
+  );
+}
+/* ---------------- Skeleton Card ---------------- */
+function SkeletonTripCard() {
+  return (
+    <div
+      className="
+        relative max-w-sm rounded-[12px] overflow-hidden bg-white shadow-lg ring-1 ring-slate-200/70
+        animate-pulse
+      "
+    >
+      {/* image placeholder */}
+      <div className="relative w-full flex justify-center items-center">
+        <div
+          className="
+            w-[90%] h-64 m-3 rounded-xl bg-slate-200/80 overflow-hidden
+            shadow-2xl shadow-black/10
+          "
+        >
+          <div className="h-full w-full shimmer" />
+        </div>
+
+        {/* chip placeholder */}
+        <div className="absolute m-3 left-3 top-2">
+          <div className="h-6 w-28 rounded-lg bg-white/80 ring-1 ring-slate-200 overflow-hidden">
+            <div className="h-full w-full shimmer" />
+          </div>
+        </div>
+      </div>
+
+      {/* content placeholder */}
+      <div className="p-3">
+        <div className="h-4 w-2/3 rounded bg-slate-200 mb-3 overflow-hidden">
+          <div className="h-full w-full shimmer" />
+        </div>
+
+        <div className="flex items-center gap-2 mt-2">
+          <div className="h-3 w-16 rounded bg-slate-200 overflow-hidden">
+            <div className="h-full w-full shimmer" />
+          </div>
+          <div className="h-3 w-24 rounded bg-slate-200 overflow-hidden">
+            <div className="h-full w-full shimmer" />
+          </div>
+        </div>
+
+        <div className="flex justify-end items-center mt-4 gap-2">
+          <div className="h-6 w-16 rounded bg-slate-200 overflow-hidden">
+            <div className="h-full w-full shimmer" />
+          </div>
+          <div className="h-9 w-28 rounded-[10px] bg-orange-200/60 overflow-hidden">
+            <div className="h-full w-full shimmer" />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -9,9 +9,7 @@ import {
   Phone,
 } from "lucide-react";
 
-/**
-WhyChoseUs * JSX + TailwindCSS — 3-card section styled like the awards layout.
- */
+
 export default function WhyChoseUs() {
   const cards = [
   
@@ -63,7 +61,7 @@ export default function WhyChoseUs() {
         className="pointer-events-none absolute inset-0 -z-10 bg-orange/5"
       />
 
-      <div className="mx-auto max-w-6xl px-4">
+      <div className="mx-auto max-w-7xl px-4">
         <h2 className="text-center text-2xl font-bold tracking-tight md:text-3xl text-orange">
           Why Book Online?
         </h2>
@@ -108,21 +106,7 @@ export default function WhyChoseUs() {
           ))}
         </div>
 
-        {/* small facility icons row (optional) */}
-        {/* <div className="mx-auto mt-8 flex max-w-xl items-center justify-center gap-6 text-gray-500">
-          <div className="flex items-center gap-2 text-sm">
-            <ShowerHead className="h-4 w-4" />
-            <span>Showers</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <Utensils className="h-4 w-4" />
-            <span>Buffet</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <Phone className="h-4 w-4" />
-            <span>Support</span>
-          </div>
-        </div> */}
+        
       </div>
     </section>
   );
