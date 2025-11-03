@@ -24,7 +24,7 @@ export default async function DashboardLayout({ children }) {
     <MobProvider>
       <div className="flex">
         <Adminpro />
-        <div className={`bg-black min-h-screen w-full  xl:ml-[400px]`}>
+        <div className={`bg-white min-h-screen w-full  xl:ml-[400px]`}>
           {children}
         </div>
       </div>
