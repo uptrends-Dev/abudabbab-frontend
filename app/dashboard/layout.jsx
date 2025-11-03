@@ -16,7 +16,7 @@ async function getUserData() {
 export default async function DashboardLayout({ children }) {
   const authed = await getUserData();
   if (!authed) {
-    // You could also just: redirect("/dashboard/login");
+    // You could also just: redirect("/login");
     return <CallBackLogOut />;
   }
 

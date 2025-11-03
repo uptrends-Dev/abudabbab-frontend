@@ -7,14 +7,14 @@ export function middleware(req) {
 
   // Protect /admin routes except the login page itself
   const isAdminPath = pathname.startsWith("/dashboard");
-  const isLoginPage = pathname === "/dashboard/login";
+  const isLoginPage = pathname === "/login";
   const isAdminPage = pathname === "/dashboard";
 
   if (isAdminPath && !isLoginPage) {
     const token = req.cookies.get(COOKIE_NAME)?.value;
     if (!token) {
       const url = req.nextUrl.clone();
-      url.pathname = "/dashboard/login";
+      url.pathname = "/login";
       return NextResponse.redirect(url);
     }
   }

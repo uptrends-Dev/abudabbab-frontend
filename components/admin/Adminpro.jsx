@@ -6,7 +6,7 @@ import AdminHeader from "./adminHeader";
 const Adminpro = () => {
       const pathname = usePathname();
 
-  if (pathname != "/dashboard/login") return <AdminHeader/>;
+  if (pathname != "/login") return <AdminHeader/>;
 };
 
 export default Adminpro;
