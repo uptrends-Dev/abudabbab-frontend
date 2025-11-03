@@ -23,7 +23,7 @@ export default function Header() {
   // ---------------------------------------
 
   return (
-    <header className="w-full bg-[#f3f4f6] sticky top-0 z-50">
+    <header className="w-full bg-[#f3f4f6] sticky top-0 z-50 py-2">
       <div className="mx-auto max-w-[1280px] px-3">
         {/* Top bar */}
         <div className="flex h-14 items-center justify-between">
