@@ -99,11 +99,7 @@ const item = {
 
         
         {/* UPDATED: empty state when no active trips */}
-        {visibleTrips.length === 0 ? (
-          <div className="mt-10 text-sm text-slate-500">
-            No active trips right now.
-          </div>
-        ) : (
+        {!loading && (
           <motion.div
             className="
               mt-10 grid grid-cols-1 gap-6
