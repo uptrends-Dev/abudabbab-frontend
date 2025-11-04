@@ -65,6 +65,7 @@ const CouponTable = () => {
     discount: { egp: "", euro: "", percent: "" },
     expirationDate: "",
     active: true,
+    ticketLimit: "", // optional number of total allowed tickets
   };
 
   const [newCoupon, setNewCoupon] = useState(structuredClone(emptyForm));
@@ -111,6 +112,9 @@ const CouponTable = () => {
                 newCoupon.expirationDate
               ),
               active: !!newCoupon.active,
+              ...(newCoupon.ticketLimit !== "" && newCoupon.ticketLimit !== null
+                ? { ticketLimit: safeNum(newCoupon.ticketLimit) }
+                : {}),
             }
           : {
               code: newCoupon.code.trim(),
@@ -120,6 +124,9 @@ const CouponTable = () => {
                 newCoupon.expirationDate
               ),
               active: !!newCoupon.active,
+              ...(newCoupon.ticketLimit !== "" && newCoupon.ticketLimit !== null
+                ? { ticketLimit: safeNum(newCoupon.ticketLimit) }
+                : {}),
             };
 
       const res = await createCoupon(payload);
@@ -165,6 +172,9 @@ const CouponTable = () => {
                 editCoupon.expirationDate
               ),
               active: !!editCoupon.active,
+              ...(editCoupon.ticketLimit !== undefined && editCoupon.ticketLimit !== ""
+                ? { ticketLimit: safeNum(editCoupon.ticketLimit) }
+                : {}),
             }
           : {
               code: String(editCoupon.code || "").trim(),
@@ -178,6 +188,9 @@ const CouponTable = () => {
                 editCoupon.expirationDate
               ),
               active: !!editCoupon.active,
+              ...(editCoupon.ticketLimit !== undefined && editCoupon.ticketLimit !== ""
+                ? { ticketLimit: safeNum(editCoupon.ticketLimit) }
+                : {}),
             };
 
       const res = await updateCoupon(id, payload);
@@ -279,6 +292,7 @@ const CouponTable = () => {
                   <Th>Code</Th>
                   <Th>Type</Th>
                   <Th>Discount</Th>
+                  <Th>Usage</Th>
                   <Th>Expiration</Th>
                   <Th>Status</Th>
                   <Th>Actions</Th>
@@ -288,7 +302,7 @@ const CouponTable = () => {
                 {loading ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="p-6 text-center text-neutral-500"
                     >
                       Loading...
@@ -297,7 +311,7 @@ const CouponTable = () => {
                 ) : coupons.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="p-6 text-center text-neutral-500"
                     >
                       No coupons found
@@ -333,6 +347,30 @@ const CouponTable = () => {
                             safeNum(coupon?.discount)
                           }%`
                         )}
+                      </Td>
+                      <Td>
+                        {(() => {
+                          const used = Number(coupon?.ticketsUsed ?? 0);
+                          const limitVal =
+                            coupon?.ticketLimit !== undefined && coupon?.ticketLimit !== null
+                              ? Number(coupon.ticketLimit)
+                              : null;
+                          const remaining =
+                            limitVal !== null && Number.isFinite(limitVal)
+                              ? Math.max(0, limitVal - used)
+                              : null;
+                          return (
+                            <div className="text-xs">
+                              <div>Used: {used}</div>
+                              <div>
+                                Limit: {limitVal !== null && Number.isFinite(limitVal) ? limitVal : "∞"}
+                              </div>
+                              {remaining !== null && (
+                                <div>Remaining: {remaining}</div>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </Td>
                       <Td className="whitespace-nowrap">
                         {coupon.expirationDate
@@ -534,6 +572,25 @@ const CouponTable = () => {
               />
             </div>
 
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">
+                Usage limit (tickets)
+              </label>
+              <input
+                type="number"
+                min={0}
+                placeholder="Optional: e.g., 100"
+                value={newCoupon.ticketLimit}
+                onChange={(e) =>
+                  setNewCoupon({ ...newCoupon, ticketLimit: e.target.value })
+                }
+                className="w-full p-3 bg-white border border-neutral-300 rounded-md text-neutral-900 focus:border-blue-500 focus:outline-none"
+              />
+              <p className="text-xs text-neutral-500 mt-1">
+                Leave empty for unlimited uses. This caps the total number of tickets that can use this coupon.
+              </p>
+            </div>
+
             <div className="flex items-center mb-6">
               <input
                 type="checkbox"
@@ -712,6 +769,47 @@ const CouponTable = () => {
                 }
                 className="w-full p-3 bg-white border border-neutral-300 rounded-md text-neutral-900 focus:border-blue-500 focus:outline-none"
               />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-2">
+                  Usage limit (tickets)
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  value={editCoupon.ticketLimit ?? ""}
+                  onChange={(e) =>
+                    setEditCoupon({
+                      ...editCoupon,
+                      ticketLimit: e.target.value,
+                    })
+                  }
+                  placeholder="Optional: e.g., 100"
+                  className="w-full p-3 bg-white border border-neutral-300 rounded-md text-neutral-900 focus:border-blue-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Current usage
+                </label>
+                <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-md text-sm">
+                  <div>
+                    Used: {Number(editCoupon?.ticketsUsed ?? 0)}
+                  </div>
+                  <div>
+                    Limit: {editCoupon?.ticketLimit !== undefined && editCoupon?.ticketLimit !== null && editCoupon?.ticketLimit !== ""
+                      ? Number(editCoupon.ticketLimit)
+                      : "∞"}
+                  </div>
+                  {editCoupon?.ticketLimit !== undefined && editCoupon?.ticketLimit !== null && editCoupon?.ticketLimit !== "" && (
+                    <div>
+                      Remaining: {Math.max(0, Number(editCoupon.ticketLimit) - Number(editCoupon?.ticketsUsed ?? 0))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center mb-6">

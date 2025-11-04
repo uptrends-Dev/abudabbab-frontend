@@ -43,6 +43,19 @@ export default function BookingsPage() {
   const [lastDays, setLastDays] = useState("");
 
   const { isMobile, toggle } = useMob();
+  // UI-only state for responsive filters (doesn't change any data logic)
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const activeFiltersCount = (() => {
+    let n = 0;
+    if (q) n++;
+    if (transferFilter !== "all") n++;
+    if (payment !== "all") n++;
+    if (checkIn !== "all") n++;
+    if (tripName) n++;
+    if (dateMode !== "none") n++;
+    return n;
+  })();
 
   const buildDateParams = () => {
     const p = {};
@@ -200,8 +213,21 @@ export default function BookingsPage() {
           </button>
         </div>
 
-        {/* Filters Card */}
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
+        {/* Mobile filters opener */}
+        <div className="mt-4 md:hidden">
+          <button
+            onClick={() => setFiltersOpen(true)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm flex items-center justify-between"
+          >
+            <span>Filters</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600">
+              {activeFiltersCount} active
+            </span>
+          </button>
+        </div>
+
+        {/* Filters Card (desktop/tablet) */}
+        <div className="hidden md:block mt-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
 
 
           {/* Primary Row */}
@@ -567,6 +593,287 @@ export default function BookingsPage() {
 
 
         </div>
+
+        {/* Mobile Filters Drawer */}
+        {filtersOpen && (
+          <div className="md:hidden fixed inset-0 z-50">
+            <div
+              className="absolute inset-0 bg-black/40"
+              onClick={() => setFiltersOpen(false)}
+            />
+            <div className="absolute inset-x-0 bottom-0 max-h-[85vh] rounded-t-2xl bg-white p-4 shadow-2xl overflow-y-auto">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-semibold">Filters</h3>
+                <button
+                  onClick={() => setFiltersOpen(false)}
+                  className="rounded-full border border-slate-200 px-3 py-1 text-sm"
+                >
+                  Close
+                </button>
+              </div>
+
+              {/* Search */}
+              <div className="space-y-2">
+                <label className="text-xs uppercase tracking-wide text-slate-500">Search</label>
+                <input
+                  value={q}
+                  onChange={(e) => {
+                    setQ(e.target.value);
+                    resetToFirst();
+                  }}
+                  placeholder={`Search by ${searchField}`}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                />
+                <SelectLabeled
+                  label="Field"
+                  value={searchField}
+                  onChange={(v) => {
+                    setSearchField(v);
+                    resetToFirst();
+                  }}
+                  options={[
+                    { value: "firstName", label: "Name" },
+                    { value: "phone", label: "Phone" },
+                    { value: "email", label: "Email" },
+                  ]}
+                />
+              </div>
+
+              {/* Toggles */}
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <SelectLabeled
+                  label="Transfer"
+                  value={transferFilter}
+                  onChange={(v) => {
+                    setTransferFilter(v);
+                    resetToFirst();
+                  }}
+                  options={[
+                    { value: "all", label: "All" },
+                    { value: "yes", label: "Yes" },
+                    { value: "no", label: "No" },
+                  ]}
+                />
+                <SelectLabeled
+                  label="Payment"
+                  value={payment}
+                  onChange={(v) => {
+                    setPaymentFilter(v);
+                    resetToFirst();
+                  }}
+                  options={[
+                    { value: "all", label: "All" },
+                    { value: "yes", label: "Yes" },
+                    { value: "no", label: "No" },
+                  ]}
+                />
+                <SelectLabeled
+                  label="Check in"
+                  value={checkIn}
+                  onChange={(v) => {
+                    setcheckInFilter(v);
+                    resetToFirst();
+                  }}
+                  options={[
+                    { value: "all", label: "All" },
+                    { value: "yes", label: "Yes" },
+                    { value: "no", label: "No" },
+                  ]}
+                />
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs uppercase tracking-wide text-slate-500">Trip</label>
+                  <select
+                    value={tripName}
+                    onChange={(e) => {
+                      setTripNameFilter(e.target.value);
+                      resetToFirst();
+                    }}
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                  >
+                    <option value="">All Trips</option>
+                    {trips.map((e) => (
+                      <option value={e?.name} key={e?.name}>
+                        {e?.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Date controls */}
+              <div className="mt-4 space-y-2">
+                <label className="text-xs uppercase tracking-wide text-slate-500">Date</label>
+                <select
+                  value={dateMode}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setDateMode(v);
+                    setDay("");
+                    setMonth("");
+                    setYear("");
+                    setFrom("");
+                    setTo("");
+                    setLastDays("");
+                    resetToFirst();
+                  }}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                >
+                  <option value="none">All time</option>
+                  <option value="day">Day</option>
+                  <option value="month">Month</option>
+                  <option value="year">Year</option>
+                  <option value="range">Range</option>
+                  <option value="lastDays">Last N days</option>
+                </select>
+
+                {dateMode === "day" && (
+                  <input
+                    type="date"
+                    value={day}
+                    onChange={(e) => {
+                      setDay(e.target.value);
+                      resetToFirst();
+                    }}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                  />
+                )}
+                {dateMode === "month" && (
+                  <input
+                    type="month"
+                    value={month}
+                    onChange={(e) => {
+                      setMonth(e.target.value);
+                      resetToFirst();
+                    }}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                  />
+                )}
+                {dateMode === "year" && (
+                  <input
+                    type="number"
+                    min="1970"
+                    max="2100"
+                    placeholder="YYYY"
+                    value={year}
+                    onChange={(e) => {
+                      setYear(e.target.value);
+                      resetToFirst();
+                    }}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                  />
+                )}
+                {dateMode === "range" && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="date"
+                      value={from}
+                      onChange={(e) => {
+                        setFrom(e.target.value);
+                        resetToFirst();
+                      }}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                      title="From (inclusive)"
+                    />
+                    <input
+                      type="date"
+                      value={to}
+                      onChange={(e) => {
+                        setTo(e.target.value);
+                        resetToFirst();
+                      }}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                      title="To (inclusive)"
+                    />
+                  </div>
+                )}
+                {dateMode === "lastDays" && (
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="e.g. 7"
+                    value={lastDays}
+                    onChange={(e) => {
+                      setLastDays(e.target.value);
+                      resetToFirst();
+                    }}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                  />
+                )}
+
+                <div className="mt-2 flex items-center gap-2">
+                  <button
+                    onClick={clearDateFilters}
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                  >
+                    Clear date
+                  </button>
+                  <button
+                    onClick={() => setFiltersOpen(false)}
+                    className="ml-auto rounded-xl bg-sky-600 px-4 py-2 text-sm text-white hover:bg-sky-700"
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+
+              {/* Sorting & rows */}
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                <SelectLabeled
+                  label="Sort"
+                  value={sort}
+                  onChange={(v) => {
+                    setSort(v);
+                    resetToFirst();
+                  }}
+                  options={[
+                    { value: "desc", label: "Newest" },
+                    { value: "asc", label: "Oldest" },
+                  ]}
+                />
+                <SelectLabeled
+                  label="Rows"
+                  value={String(limit)}
+                  onChange={(v) => {
+                    setLimit(Number(v));
+                    resetToFirst();
+                  }}
+                  options={[
+                    { value: "10", label: "10" },
+                    { value: "20", label: "20" },
+                    { value: "50", label: "50" },
+                    { value: "100", label: "100" },
+                  ]}
+                />
+              </div>
+
+              <div className="mt-6 flex items-center justify-between">
+                <button
+                  onClick={() => {
+                    setQ("");
+                    setSearchField("firstName");
+                    setTransferFilter("all");
+                    setPaymentFilter("all");
+                    setcheckInFilter("all");
+                    setTripNameFilter("");
+                    setSort("desc");
+                    setLimit(20);
+                    clearDateFilters();
+                    resetToFirst();
+                  }}
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm"
+                >
+                  Reset all
+                </button>
+                <button
+                  onClick={() => setFiltersOpen(false)}
+                  className="rounded-xl bg-sky-600 px-4 py-2 text-sm text-white hover:bg-sky-700"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Table Card */}
         <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">

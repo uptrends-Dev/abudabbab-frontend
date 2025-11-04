@@ -18,7 +18,7 @@ import { BOOKING } from "@/paths";
 import { useRouter } from "next/navigation";
 import { checkOut } from "../../../lib/apis/api";
 import { clearState, updateTotalPrice } from "@/app/store/slice/checkoutSlice";
-import { validateCouponCode } from "../../../lib/apis/couponApi";
+import { applyCouponCode, validateCouponCode } from "../../../lib/apis/couponApi";
 
 export default function CheckoutSection() {
   const router = useRouter();
@@ -84,26 +84,7 @@ export default function CheckoutSection() {
       alert("Failed to create booking. Please try again.");
     }
 
-    // try {
-    //   const created = await dispatch(
-    //     postBooking({
-    //       url: BOOKING,
-    //     })
-    //   ).unwrap();
 
-    //   const id = created?._id || created?.id || created?.data?._id;
-    //   alert(
-    //     id
-    //       ? `Booking created ✅ ID: ${id}`
-    //       : `Booking created ✅\n${JSON.stringify(created)}`
-    //   );
-    //   reset();
-
-    // } catch (e) {
-    //   alert(
-    //     `Failed to create booking:\n${typeof e === "string" ? e : JSON.stringify(e)}`
-    //   );
-    // }
   };
 
 
@@ -131,13 +112,14 @@ export default function CheckoutSection() {
       setCouponError("Please enter a coupon code");
       return;
     }
+    const ticketCount = adults + children;
     try {
       setIsApplying(true);
-      const result = await validateCouponCode(couponCode.trim());
+      const result = await applyCouponCode(couponCode.trim(), ticketCount);
       // result shape: { status: "success", data: { type, discount } } OR throw on fail
-      const couponType = result?.type;
-      const discountObj = result?.discount;
-
+      const couponType = result?.coupon?.type;
+      const discountObj = result?.coupon?.discount;
+      console.log("Coupon applied:", couponType, discountObj);
       let discountEuro = 0;
       if (couponType === "amount") {
         discountEuro = Number(discountObj?.euro ?? 0);
@@ -156,7 +138,7 @@ export default function CheckoutSection() {
       setIsApplying(false);
     }
   };
-
+ 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 pt-6">
