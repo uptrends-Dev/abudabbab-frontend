@@ -74,7 +74,7 @@ export default function ContactUs() {
 
   return (
     <motion.section
-      className="relative py-16"
+      className="relative py-16 overflow-hidden"
       variants={sectionV}
       initial="hidden"
       whileInView="show"

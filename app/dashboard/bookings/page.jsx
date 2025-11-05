@@ -87,7 +87,7 @@ export default function BookingsPage() {
       const trip = await getallTrips(TRIPS_URL);
       setTrips(trip);
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   }
 

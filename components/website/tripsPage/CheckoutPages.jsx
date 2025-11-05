@@ -9,6 +9,8 @@ import {
   FiCalendar,
   FiUsers,
 } from "react-icons/fi";
+import { FaCheckCircle } from "react-icons/fa";
+import toast, { Toaster } from "react-hot-toast";
 // import { setUserInfo, setTripId } from "@/app/store/bookingSlice";
 // import { postBooking, clearBookingState } from "@/lib/apis/bookingsApi";
 import Link from "next/link";
@@ -18,15 +20,18 @@ import { BOOKING } from "@/paths";
 import { useRouter } from "next/navigation";
 import { checkOut } from "../../../lib/apis/api";
 import { clearState, updateTotalPrice } from "@/app/store/slice/checkoutSlice";
-import { applyCouponCode, validateCouponCode } from "../../../lib/apis/couponApi";
+import {
+  applyCouponCode,
+  validateCouponCode,
+} from "../../../lib/apis/couponApi";
 
 export default function CheckoutSection() {
   const router = useRouter();
   const dispatch = useDispatch();
   const bookingState = useSelector((state) => state.checkout);
   const Trip = useSelector((state) => state.trips);
-  const selectedTrip = Trip.trips.find(t => t._id === bookingState.tripId) || null
-
+  const selectedTrip =
+    Trip.trips.find((t) => t._id === bookingState.tripId) || null;
 
   const {
     register,
@@ -37,23 +42,31 @@ export default function CheckoutSection() {
 
   // Submit: save user info, then post booking
   const onSubmit = async (data) => {
-    console.log("Form data:", data);
+    // console.log("Form data:", data);
 
-    const raw =
-      bookingState?.bookingDate || bookingState?.date || "";
+    const raw = bookingState?.bookingDate || bookingState?.date || "";
     const bookingDate = raw
       ? new Date(`${raw}T14:00:00.000Z`).toISOString()
       : undefined;
 
     try {
-      const totalEuro = Number(bookingState?.totalPrice?.euro ?? baseTotal ?? 0)
-      const totalEgp = Number(bookingState?.totalPrice?.egp ?? 0)
+      const totalEuro = Number(
+        bookingState?.totalPrice?.euro ?? baseTotal ?? 0
+      );
+      const totalEgp = Number(bookingState?.totalPrice?.egp ?? 0);
       const payload = {
         tripInfo: String(bookingState.tripId),
         adult: Math.max(1, Number(bookingState?.adult ?? 1)),
         child: Math.max(0, Number(bookingState?.child ?? 0)),
         subtotal: { egp: 0, euro: Number((baseTotal || 0).toFixed(2)) },
-        ...(appliedCoupon ? { coupon: { code: appliedCoupon.code, discount: { egp: 0, euro: appliedCoupon.discountEuro } } } : {}),
+        ...(appliedCoupon
+          ? {
+              coupon: {
+                code: appliedCoupon.code,
+                discount: { egp: 0, euro: appliedCoupon.discountEuro },
+              },
+            }
+          : {}),
         totalPrice: {
           egp: totalEgp,
           euro: Number(totalEuro.toFixed(2)),
@@ -70,23 +83,77 @@ export default function CheckoutSection() {
         checkIn: Boolean(bookingState?.checkIn ?? false),
         ...(bookingDate ? { bookingDate } : {}),
       };
-      console.log("Booking payload:", payload);
+      // console.log("Booking payload:", payload);
       const res = await checkOut(payload);
-      console.log("Booking response:", res);
-      alert("Booking created successfully!");
+      // console.log("Booking response:", res);
+
+      // Show premium toast notification
+      toast.custom(
+        (t) => (
+          <div
+            className={`${
+              t.visible ? "animate-enter" : "animate-leave"
+            } max-w-md w-full bg-white shadow-2xl rounded-2xl pointer-events-auto flex flex-col ring-1 ring-black ring-opacity-5 p-6`}
+          >
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center">
+                  <FaCheckCircle className="text-white text-2xl" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-gray-900">
+                  Booking Completed! 🎉
+                </h3>
+                <p className="mt-1 text-sm text-gray-600">
+                  Your booking for{" "}
+                  <span className="font-semibold text-orange-600">
+                    {selectedTrip?.name}
+                  </span>{" "}
+                  has been confirmed.
+                </p>
+                <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <FiCalendar className="text-blue-600" />
+                    {when}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <FiUsers className="text-blue-600" />
+                    {adults} Adult{adults !== 1 ? "s" : ""}
+                    {children > 0 &&
+                      `, ${children} Child${children !== 1 ? "ren" : ""}`}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="mt-4 w-full bg-gradient-to-r from-blue-600 to-orange-500 text-white font-semibold py-2 px-4 rounded-lg hover:from-blue-700 hover:to-orange-600 transition-all"
+            >
+              OK
+            </button>
+          </div>
+        ),
+        {
+          duration: 2000,
+          position: "top-center",
+        }
+      );
+
       reset();
-      dispatch(clearState());
-      router.push("/trips");
-      router.refresh();
+
+      setTimeout(() => {
+        dispatch(clearState());
+      }, 3000);
     } catch (error) {
       // alert("Failed to create booking:\n" + (typeof error === "string" ? error : JSON.stringify(error)));
       console.error("Booking error:", error);
-      alert("Failed to create booking. Please try again.");
+      toast.error("Failed to create booking. Please try again.", {
+        duration: 2000,
+        position: "top-center",
+      });
     }
-
-
   };
-
 
   const when = bookingState?.bookingDate || "Not selected";
   const transferTxt = bookingState?.transfer ? "required" : "not required";
@@ -97,7 +164,8 @@ export default function CheckoutSection() {
   const childPriceEuro = selectedTrip?.prices?.child?.euro ?? 0;
   const transferFee = bookingState?.bookingDetails?.transfer ? 25 : 0;
 
-  const baseTotal = adultPriceEuro * adults + childPriceEuro * children + transferFee;
+  const baseTotal =
+    adultPriceEuro * adults + childPriceEuro * children + transferFee;
 
   const [couponCode, setCouponCode] = useState("");
   const [couponError, setCouponError] = useState("");
@@ -119,7 +187,7 @@ export default function CheckoutSection() {
       // result shape: { status: "success", data: { type, discount } } OR throw on fail
       const couponType = result?.coupon?.type;
       const discountObj = result?.coupon?.discount;
-      console.log("Coupon applied:", couponType, discountObj);
+      // console.log("Coupon applied:", couponType, discountObj);
       let discountEuro = 0;
       if (couponType === "amount") {
         discountEuro = Number(discountObj?.euro ?? 0);
@@ -130,7 +198,10 @@ export default function CheckoutSection() {
 
       const newTotal = Math.max(0, baseTotal - discountEuro);
       dispatch(updateTotalPrice({ egp: 0, euro: Number(newTotal.toFixed(2)) }));
-      setAppliedCoupon({ code: couponCode.trim(), discountEuro: Number(discountEuro.toFixed(2)) });
+      setAppliedCoupon({
+        code: couponCode.trim(),
+        discountEuro: Number(discountEuro.toFixed(2)),
+      });
     } catch (e) {
       setAppliedCoupon(null);
       setCouponError(e?.message || "Failed to apply coupon");
@@ -138,9 +209,24 @@ export default function CheckoutSection() {
       setIsApplying(false);
     }
   };
- 
+
   return (
     <div className="min-h-screen bg-gray-50">
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+        gutter={8}
+        containerClassName=""
+        containerStyle={{}}
+        toastOptions={{
+          className: "",
+          duration: 5000,
+          style: {
+            background: "transparent",
+            boxShadow: "none",
+          },
+        }}
+      />
       <div className="max-w-6xl mx-auto px-4 pt-6">
         <p className="text-[40px] p-1 rounded-3xl text-black text-center font-bold ">
           Check Out ..
@@ -166,7 +252,12 @@ export default function CheckoutSection() {
             {/* First & Last name */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label htmlFor="firstName" className="text-sm font-medium text-gray-800">First Name</label>
+                <label
+                  htmlFor="firstName"
+                  className="text-sm font-medium text-gray-800"
+                >
+                  First Name
+                </label>
                 <div className="relative">
                   <input
                     id="firstName"
@@ -182,12 +273,21 @@ export default function CheckoutSection() {
                       minLength: { value: 2, message: "Too short" },
                     })}
                   />
-                  {errors.firstName && <p className="text-red-500 text-xs">{errors.firstName.message}</p>}
+                  {errors.firstName && (
+                    <p className="text-red-500 text-xs">
+                      {errors.firstName.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="lastName" className="text-sm font-medium text-gray-800">Last Name</label>
+                <label
+                  htmlFor="lastName"
+                  className="text-sm font-medium text-gray-800"
+                >
+                  Last Name
+                </label>
                 <div className="relative">
                   <input
                     id="lastName"
@@ -203,14 +303,23 @@ export default function CheckoutSection() {
                       minLength: { value: 2, message: "Too short" },
                     })}
                   />
-                  {errors.lastName && <p className="text-red-500 text-xs">{errors.lastName.message}</p>}
+                  {errors.lastName && (
+                    <p className="text-red-500 text-xs">
+                      {errors.lastName.message}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Email */}
             <div className="space-y-1.5">
-              <label htmlFor="email" className="text-sm font-medium text-gray-800">Email</label>
+              <label
+                htmlFor="email"
+                className="text-sm font-medium text-gray-800"
+              >
+                Email
+              </label>
               <div className="relative">
                 <input
                   id="email"
@@ -225,13 +334,20 @@ export default function CheckoutSection() {
                     },
                   })}
                 />
-                {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
+                {errors.email && (
+                  <p className="text-red-500 text-xs">{errors.email.message}</p>
+                )}
               </div>
             </div>
 
             {/* Phone */}
             <div className="space-y-1.5">
-              <label htmlFor="phone" className="text-sm font-medium text-gray-800">Phone</label>
+              <label
+                htmlFor="phone"
+                className="text-sm font-medium text-gray-800"
+              >
+                Phone
+              </label>
               <div className="relative">
                 <input
                   id="phone"
@@ -246,13 +362,20 @@ export default function CheckoutSection() {
                     },
                   })}
                 />
-                {errors.phone && <p className="text-red-500 text-xs">{errors.phone.message}</p>}
+                {errors.phone && (
+                  <p className="text-red-500 text-xs">{errors.phone.message}</p>
+                )}
               </div>
             </div>
 
             {/* Message */}
             <div className="space-y-1.5">
-              <label htmlFor="message" className="text-sm font-medium text-gray-800">Message</label>
+              <label
+                htmlFor="message"
+                className="text-sm font-medium text-gray-800"
+              >
+                Message
+              </label>
               <div className="relative">
                 <textarea
                   id="message"
@@ -260,14 +383,21 @@ export default function CheckoutSection() {
                   rows={5}
                   className="w-full rounded-lg border border-gray-300 bg-white p-3 pl-10 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                   {...register("message", {
-                    maxLength: { value: 500, message: "Message cannot exceed 500 characters" },
+                    maxLength: {
+                      value: 500,
+                      message: "Message cannot exceed 500 characters",
+                    },
                     pattern: {
                       value: /^[A-Za-z0-9 .,'!?"()-]*$/i,
                       message: "Message contains invalid characters",
                     },
                   })}
                 />
-                {errors.message && <p className="text-red-500 text-xs">{errors.message.message}</p>}
+                {errors.message && (
+                  <p className="text-red-500 text-xs">
+                    {errors.message.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -286,7 +416,9 @@ export default function CheckoutSection() {
           <div className="lg:sticky lg:top-4 space-y-4">
             <div className="bg-white border border-gray-200 rounded-2xl p-4">
               <div className="mb-4">
-                <h2 className="text-2xl font-semibold tracking-tight text-blue-700">Booking Summary</h2>
+                <h2 className="text-2xl font-semibold tracking-tight text-blue-700">
+                  Booking Summary
+                </h2>
               </div>
 
               <div className="flex gap-3">
@@ -305,8 +437,12 @@ export default function CheckoutSection() {
               </div>
 
               <dl className="mt-4 space-y-3 text-sm">
-                <Row icon={<FiCalendar />} label="When">{when}</Row>
-                <Row icon={<FiCalendar />} label="Transfer">{transferTxt}</Row>
+                <Row icon={<FiCalendar />} label="When">
+                  {when}
+                </Row>
+                <Row icon={<FiCalendar />} label="Transfer">
+                  {transferTxt}
+                </Row>
                 <Row icon={<FiUsers />} label="Participants">
                   {adults} Adult{adults === 1 ? "" : "s"}
                   {children > 0
@@ -316,7 +452,12 @@ export default function CheckoutSection() {
               </dl>
 
               <div className="mt-4">
-                <label htmlFor="coupon" className="block text-sm font-medium text-gray-800">Coupon Code</label>
+                <label
+                  htmlFor="coupon"
+                  className="block text-sm font-medium text-gray-800"
+                >
+                  Coupon Code
+                </label>
                 <div className="mt-1 flex gap-2">
                   <input
                     id="coupon"
@@ -339,31 +480,44 @@ export default function CheckoutSection() {
                   <p className="mt-1 text-xs text-red-600">{couponError}</p>
                 )}
                 {appliedCoupon && !couponError && (
-                  <p className="mt-1 text-xs text-emerald-700">Applied {appliedCoupon.code}. Saved €{appliedCoupon.discountEuro}.</p>
+                  <p className="mt-1 text-xs text-emerald-700">
+                    Applied {appliedCoupon.code}. Saved €
+                    {appliedCoupon.discountEuro}.
+                  </p>
                 )}
               </div>
 
               <div className="mt-4 border-t pt-4 flex items-end justify-between">
                 <div>
                   <p className="text-lg font-semibold">Total</p>
-                  <p className="text-xs text-gray-600">All taxes and fees included</p>
+                  <p className="text-xs text-gray-600">
+                    All taxes and fees included
+                  </p>
                 </div>
                 <div className="text-right">
-                  {appliedCoupon && bookingState?.totalPrice?.euro !== undefined ? (
+                  {appliedCoupon &&
+                  bookingState?.totalPrice?.euro !== undefined ? (
                     <>
-                      <p className="text-sm line-through text-gray-500">€{baseTotal.toFixed(2)}</p>
-                      <p className="text-2xl font-bold tracking-tight">€{Number(total).toFixed(2)}</p>
+                      <p className="text-sm line-through text-gray-500">
+                        €{baseTotal.toFixed(2)}
+                      </p>
+                      <p className="text-2xl font-bold tracking-tight">
+                        €{Number(total).toFixed(2)}
+                      </p>
                     </>
                   ) : (
-                    <p className="text-2xl font-bold tracking-tight">€{Number(bookingState.originalPrice.euro).toFixed(2)}</p>
+                    <p className="text-2xl font-bold tracking-tight">
+                      €{Number(bookingState.originalPrice.euro).toFixed(2)}
+                    </p>
                   )}
                 </div>
               </div>
             </div>
-            <Link href={"/trips"}>
+            <Link href={"/home/trip"}>
               <button
                 onClick={() => dispatch(clearState())}
-                className="flex justify-center items-center cursor-pointer w-full sm:w-auto rounded-full bg-orange-600 px-6 py-3 font-semibold text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60">
+                className="flex justify-center items-center cursor-pointer w-full sm:w-auto rounded-full bg-orange-600 px-6 py-3 font-semibold text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
+              >
                 <div>Return To Trips</div> <IoIosArrowForward />
               </button>
             </Link>

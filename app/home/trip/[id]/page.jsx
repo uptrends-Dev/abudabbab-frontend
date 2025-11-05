@@ -36,7 +36,7 @@ export default function Page() {
     }
     fetchCurrancyEx();
   }, []);
-  console.log(currancy);
+  // console.log(currancy);
   const tripsInStore = useSelector((s) => s.trips.trips);
   // const booking = useSelector((s) => s.bookings);
 

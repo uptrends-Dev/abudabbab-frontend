@@ -7,7 +7,7 @@ export const fetchTripsData = createAsyncThunk(
   "trips/fetchTripsData",
   async () => {
     const response = await getallTrips()
-    console.log(response)
+    // console.log(response)
     return response;
   }
 );

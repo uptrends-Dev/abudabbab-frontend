@@ -105,7 +105,7 @@ const item = {
               mt-10 grid grid-cols-1 gap-6
               sm:grid-cols-2 lg:grid-cols-3
               overflow-x-auto lg:overflow-visible
-              snap-x snap-mandatory lg:snap-none pb-2
+              snap-x snap-mandatory lg:snap-none pb-2 justify-items-center 
             "
             variants={container}
             initial="hidden"
@@ -123,7 +123,7 @@ const item = {
                   will-change-transform
                   before:content-[''] before:absolute before:inset-0 before:-z-10 before:rounded-[14px]
                   before:bg-gradient-to-br before:from-orange-400/0 before:via-orange-400/15 before:to-fuchsia-500/0
-                  before:opacity-0 group-hover:before:opacity-100 before:transition-opacity before:duration-500
+                  before:opacity-0 group-hover:before:opacity-100 before:transition-opacity before:duration-500 w-3/3
                 "
               >
                 <div className="relative w-full flex justify-center items-center">
@@ -159,11 +159,13 @@ const item = {
                     {t?.name ?? "Untitled Trip"} {/* UPDATED */}
                   </h2>
 
-                  <div className="flex items-center mt-2">
-                    <span className="text-yellow-500 text-xs">★★★★★</span>
+                  <div className="flex items-center mt-2 text-gray-600 ">
+                    {/* <span className="text-yellow-500 text-xs">★★★★★</span>
                     <span className="ml-2 text-xs text-gray-500">
                       (650+ Ratings)
-                    </span>
+                    </span> */}
+                    {t.description?.split(' ').slice(0, 5).join(' ')}
+                    {t.description?.split(' ').length > 5 && '...'}
                   </div>
 
                   <div className="flex justify-end items-center mt-4 gap-2">
