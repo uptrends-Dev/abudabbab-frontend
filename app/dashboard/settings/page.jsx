@@ -234,7 +234,7 @@ export default function UsersPage() {
               <div className="flex items-center gap-4">
                 <div className="relative h-12 w-12 overflow-hidden rounded-full ring-2 ring-cyan-200">
                   <Image
-                    src={admin.profilePicture || "/avatar.svg"}
+                    src={admin.profilePicture || "/shiref.png"}
                     alt={admin.username}
                     fill
                     className="object-cover"
