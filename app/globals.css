@@ -50,7 +50,7 @@ body {
   font-family: "poppins", sans-serif;
 } */
 .tripBanner{
-  background-image: url('/bannerPhoto.jpg');
+  background-image: url('/Artboard.jpg');
   background-attachment: fixed;
   background-size: cover;
 }

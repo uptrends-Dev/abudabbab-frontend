@@ -40,11 +40,11 @@ export default function WhyChoseUs() {
         "Special offers for nationals, residents, and group travel.",
         <span key="contact">
           For details,{" "}
-          <a href="#contact" className="underline underline-offset-4">
+          <a href="https://www.abudabbab.com/contact-us" className="underline underline-offset-4">
             Contact us
           </a>{" "}
           or see our{" "}
-          <a href="#terms" className="underline underline-offset-4">
+          <a href="https://www.abudabbab.com/terms-conditions" className="underline underline-offset-4">
             Terms of Service
           </a>
           .

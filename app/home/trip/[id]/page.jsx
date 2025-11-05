@@ -2,9 +2,9 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
-import axios, { get } from "axios";
+import axios from "axios";
 import { 
   FaCalendarAlt, 
   FaUsers, 
@@ -16,9 +16,9 @@ import {
   FaCheckCircle,
   FaInfoCircle
 } from "react-icons/fa";
-// import { setBookingDetails } from "@/app/store/bookingSlice";
-// import { getTrip } from "@/lib/apis/api";
 import { setBookingData } from "../../../../app/store/slice/checkoutSlice";
+import { getTrip } from "../../../../lib/apis/api";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function Page() {
   const today = new Date().toISOString().split('T')[0];
@@ -26,7 +26,11 @@ export default function Page() {
   const router = useRouter();
   const dispatch = useDispatch();
   const [currancy, setCurrancy] = useState("");
+  const [trip, setTrip] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState(null);
 
+  // Fetch currency exchange rate
   useEffect(() => {
     async function fetchCurrancyEx() {
       const response = await axios.get(
@@ -36,47 +40,28 @@ export default function Page() {
     }
     fetchCurrancyEx();
   }, []);
-  // console.log(currancy);
-  const tripsInStore = useSelector((s) => s.trips.trips);
-  // const booking = useSelector((s) => s.bookings);
 
-  const [trip, setTrip] = useState(
-    () => tripsInStore.find((t) => String(t._id) === String(id)) || null
-  );
-  const [loading, setLoading] = useState(!trip);
-  const [err, setErr] = useState(null);
-  const egpPriceAdult = trip?.prices?.adult?.euro * currancy
-  const egpPriceChild = trip?.prices?.child?.euro * currancy
-  // fallback fetch by id on reload
-
+  // Fetch trip data directly from API
   useEffect(() => {
-    const fromStore = tripsInStore.find((t) => String(t._id) === String(id));
-    if (fromStore) {
-      setTrip(fromStore);
-      setLoading(false);
-      return;
+    const fetchTrip = async () => {
+      try {
+        setLoading(true);
+        const data = await getTrip(id);
+        setTrip(data);
+        setLoading(false);
+      } catch (e) {
+        setErr(e?.message || "Failed to load trip");
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchTrip();
     }
+  }, [id]);
 
-    // let mounted = true;
-    // (async () => {
-    //   try {
-    //     setLoading(true);
-    //     const data = await getTrip(id);
-    //     console.log(data);
-    //     if (!mounted) return;
-    //     setTrip(data);
-    //   } catch (e) {
-    //     if (!mounted) return;
-    //     setErr(e?.message || "Failed to load trip");
-    //   } finally {
-    //     if (mounted) setLoading(false);
-    //   }
-    // })();
-
-    // return () => {
-    //   mounted = false;
-    // };
-  }, [id, tripsInStore]);
+  const egpPriceAdult = trip?.prices?.adult?.euro * currancy;
+  const egpPriceChild = trip?.prices?.child?.euro * currancy;
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm({
     defaultValues: { adult: 1, child: 0, date: "", transfer: false },
@@ -108,33 +93,72 @@ export default function Page() {
 
   const onSubmit = (data) => {
     if (!trip) return;
-    // dispatch(
-    //   setBookingDetails({
-    //     adult: Number(data.adult),
-    //     child: Number(data.child),
-    //     transfer: !!data.transfer,
-    //     payment: !!data.payment,
-    //     bookingDate: data.date, // normalized
-    //     totalPrice: { egp: totalEgp, euro: totalEuro },
-    //     tripId: trip._id,
-    //     trip, // keep trip for checkout summary
-    //   })
-    // );
+
     dispatch(setBookingData({
       adult: Number(data.adult),
       child: Number(data.child),
       transfer: !!data.transfer,
       payment: !!data.payment,
-      bookingDate: data.date, // normalized
+      bookingDate: data.date,
       totalPrice: { egp: totalEgp, euro: totalEuro },
       tripId: trip._id,
     }));
-    router.push("/home/trip/checkOut");
-  };
 
-  // useEffect(() => {
-  //   console.log("bookings updated:", booking);
-  // }, [booking]);
+    toast.custom(
+      (t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } max-w-md w-full bg-white shadow-2xl rounded-2xl pointer-events-auto flex flex-col ring-1 ring-black ring-opacity-5 p-6`}
+        >
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center">
+                <FaCheckCircle className="text-white text-2xl" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-gray-900">
+                Booking Confirmed! 🎉
+              </h3>
+              <p className="mt-1 text-sm text-gray-600">
+                Your trip to{" "}
+                <span className="font-semibold text-orange-600">
+                  {trip?.name}
+                </span>{" "}
+                is ready for checkout.
+              </p>
+              <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+                <span className="flex items-center gap-1">
+                  <FaCalendarAlt className="text-blue-600" />
+                  {data.date}
+                </span>
+                <span className="flex items-center gap-1">
+                  <FaUsers className="text-blue-600" />
+                  {adult} Adult{adult !== 1 ? "s" : ""}
+                  {child > 0 && `, ${child} Child${child !== 1 ? "ren" : ""}`}
+                </span>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="mt-4 w-full bg-gradient-to-r from-blue-600 to-orange-500 text-white font-semibold py-2 px-4 rounded-lg hover:from-blue-700 hover:to-orange-600 transition-all"
+          >
+            OK
+          </button>
+        </div>
+      ),
+      {
+        duration: 5000,
+        position: "top-center",
+      }
+    );
+
+    setTimeout(() => {
+      router.push("/home/trip/checkOut");
+    }, 800);
+  };
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -175,6 +199,21 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-white">
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+        gutter={8}
+        containerClassName=""
+        containerStyle={{}}
+        toastOptions={{
+          className: "",
+          duration: 5000,
+          style: {
+            background: "transparent",
+            boxShadow: "none",
+          },
+        }}
+      />
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Back Button */}
         <button

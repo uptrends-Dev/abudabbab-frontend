@@ -424,7 +424,7 @@ export default function DashboardTrips() {
             <CardSkeleton />
           </div>
         )}
-
+{/* 
         {!!error && !loading && (
           <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center">
             <div className="text-rose-700 font-medium mb-1">
@@ -438,9 +438,9 @@ export default function DashboardTrips() {
               Try Again
             </button>
           </div>
-        )}
+        )} */}
 
-        {!loading && !error && filtered.length === 0 && (
+        {filtered.length === 0 && (
           <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500">
             No trips found. Try adjusting filters or add a new trip.
           </div>

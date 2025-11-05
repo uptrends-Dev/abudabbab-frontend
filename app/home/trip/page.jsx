@@ -7,7 +7,7 @@ import ContactUs from "../../../components/website/tripsPage/ContactUs";
 export default function page() {
   return (
     <div>
-      <Cover title="Explore Popular Trips" bgImage="/Artboard.jpg" />
+      <Cover title="Explore Popular Trips" bgImage="/coverGB.jpg" />
       <TripsSection />
       <Tripbanner />
       <WhyChoseUs />

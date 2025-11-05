@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion } from "framer-motion";
 
 export default function Cover({
-  title = 'Explore Popular Trips',
-  bgImage = '/images/sea-hero.jpg',
+  title = "Explore Popular Trips",
+  bgImage = "/coverGB.jpg",
 }) {
   const prefersReducedMotion = useReducedMotion();
 
   const fadeUp = {
     initial: { opacity: 0, y: 18 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.7, ease: 'easeOut' },
+    transition: { duration: 0.7, ease: "easeOut" },
   };
 
   const breadcrumbVariants = {
@@ -19,7 +19,7 @@ export default function Cover({
     animate: (i) => ({
       opacity: 1,
       y: 0,
-      transition: { delay: 0.35 + i * 0.08, duration: 0.4, ease: 'easeOut' },
+      transition: { delay: 0.35 + i * 0.08, duration: 0.4, ease: "easeOut" },
     }),
   };
 
@@ -33,24 +33,25 @@ export default function Cover({
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${bgImage})` }}
         initial={false}
-        animate={
-          prefersReducedMotion
-            ? undefined
-            : { scale: [1, 1.08, 1] }
-        }
+        animate={prefersReducedMotion ? undefined : { scale: [1, 1.08, 1] }}
         transition={
           prefersReducedMotion
             ? undefined
-            : { duration: 18, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' }
+            : {
+                duration: 18,
+                repeat: Infinity,
+                repeatType: "mirror",
+                ease: "easeInOut",
+              }
         }
       />
 
       {/* Sea-tinted overlay fade */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-br from-[#F87B1B]/10 via-[#F87B1B]/40 to-[#F87B1B]/20"
+        className="absolute inset-0 bg-gradient-to-br from-[#1038b9]/10 via-[#1038b9]/20 to-[#1038b9]/50"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       />
 
       {/* Content */}
@@ -84,11 +85,11 @@ export default function Cover({
               animate="animate"
               custom={1}
             >
-              //
+              /
             </motion.span>
 
             <motion.span
-              className="text-[#000000]"
+              className="text-orange"
               variants={breadcrumbVariants}
               initial="initial"
               animate="animate"
@@ -101,7 +102,7 @@ export default function Cover({
       </div>
 
       {/* Left doodles: bubbles float */}
-      <motion.div
+      {/* <motion.div
         className="pointer-events-none absolute left-4 md:left-8 bottom-8 z-10 text-white/90"
         animate={
           prefersReducedMotion
@@ -120,55 +121,23 @@ export default function Cover({
           <circle cx="46" cy="30" r="5" stroke="white" strokeWidth="2" />
           <circle cx="60" cy="18" r="3" stroke="white" strokeWidth="2" />
         </svg>
-      </motion.div>
+      </motion.div> */}
 
       {/* Right doodle: wave draws + starfish wobbles */}
-      <div className="pointer-events-none absolute right-6 md:right-10 top-10 z-10">
-        <svg width="64" height="48" viewBox="0 0 64 48" fill="none">
-          {/* wave draw */}
-          <motion.path
-            d="M2 30c8-8 16 8 24 0s16 8 24 0"
-            stroke="white"
-            strokeWidth="2"
-            fill="none"
-            initial={{ pathLength: 0, opacity: 0.6 }}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 1.2, ease: 'easeOut', delay: 0.2 }}
-          />
-          {/* starfish gentle wobble */}
-          <motion.path
-            d="M40 8l3 6 7 1-5 4 2 6-6-3-6 3 2-6-5-4 7-1 3-6z"
-            stroke="white"
-            strokeWidth="2"
-            fill="none"
-            animate={
-              prefersReducedMotion
-                ? undefined
-                : { rotate: [0, 6, 0, -6, 0] }
-            }
-            transform="translate(0 0)"
-            style={{ transformOrigin: '40px 16px' }}
-            transition={
-              prefersReducedMotion
-                ? undefined
-                : { duration: 6, repeat: Infinity, ease: 'easeInOut' }
-            }
-          />
-        </svg>
-      </div>
+      <div className="pointer-events-none absolute right-6 md:right-10 top-10 z-10"></div>
 
       {/* Bottom angled sea bars slide in */}
       <motion.div
         className="absolute bottom-0 left-0 w-full h-4 md:h-6 bg-[#F87B1B]/80"
-        initial={{ x: '-100%' }}
+        initial={{ x: "-100%" }}
         animate={{ x: 0 }}
-        transition={{ duration: 0.6, ease: 'easeOut', delay: 0.15 }}
+        transition={{ duration: 0.6, ease: "easeOut", delay: 0.15 }}
       />
       <motion.div
         className="absolute bottom-0 right-0 h-4 md:h-6 w-20 md:w-32 bg-[#007DB0] -skew-x-12 origin-bottom-left"
-        initial={{ x: '100%' }}
+        initial={{ x: "100%" }}
         animate={{ x: 0 }}
-        transition={{ duration: 0.6, ease: 'easeOut', delay: 0.25 }}
+        transition={{ duration: 0.6, ease: "easeOut", delay: 0.25 }}
       />
     </section>
   );
