@@ -18,13 +18,32 @@ const initialState = {
 const tripsSlice = createSlice({
   name: "trips",
   initialState,
-  reducers: {},
+  reducers: {
+    // Manually set entire trips array (e.g. after direct API fetch)
+    setTrips: (state, action) => {
+      state.trips = Array.isArray(action.payload) ? action.payload : [];
+    },
+    // Upsert a single trip (add if missing, replace if exists)
+    upsertTrip: (state, action) => {
+      const trip = action.payload;
+      if (!trip || !trip._id) return;
+      const idx = state.trips.findIndex((t) => t._id === trip._id);
+      if (idx >= 0) {
+        state.trips[idx] = { ...state.trips[idx], ...trip };
+      } else {
+        state.trips.push(trip);
+      }
+    },
+    // Clear trips (optional utility)
+    clearTrips: (state) => {
+      state.trips = [];
+    },
+  },
   extraReducers: (builder) => {
     builder
-
-      // GET trip
+      // GET trips via thunk
       .addCase(fetchTripsData.pending, (state) => {
-        state.loading = true; //
+        state.loading = true;
       })
       .addCase(fetchTripsData.fulfilled, (state, action) => {
         state.loading = false;
@@ -33,10 +52,11 @@ const tripsSlice = createSlice({
       .addCase(fetchTripsData.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
-      })
+      });
   },
 });
 
+export const { setTrips, upsertTrip, clearTrips } = tripsSlice.actions;
 export default tripsSlice.reducer;
 
 // update usage in component

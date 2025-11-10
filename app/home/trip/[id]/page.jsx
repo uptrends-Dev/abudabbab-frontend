@@ -17,6 +17,7 @@ import {
   FaInfoCircle
 } from "react-icons/fa";
 import { setBookingData } from "../../../../app/store/slice/checkoutSlice";
+import { upsertTrip } from "../../../../app/store/slice/tripsSlices";
 import { getTrip } from "../../../../lib/apis/api";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -48,6 +49,8 @@ export default function Page() {
         setLoading(true);
         const data = await getTrip(id);
         setTrip(data);
+        // Store/refresh this trip in Redux for checkout and other consumers
+        dispatch(upsertTrip(data));
         setLoading(false);
       } catch (e) {
         setErr(e?.message || "Failed to load trip");

@@ -2,10 +2,10 @@
 import React, { useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchTripsData } from "../../../lib/apis/tripsApi";
+import { useDispatch } from "react-redux";
 import Image from "next/image";
 import { getallTrips } from "../../../lib/apis/api";
+import { setTrips as setTripsStore } from "../../../app/store/slice/tripsSlices";
 
 const container = {
   hidden: { opacity: 0 },
@@ -17,7 +17,7 @@ const container = {
 
 export default function TripsSection() {
   const dispatch = useDispatch();
-  const [trips, setTrips] = React.useState([]);
+  const [trips, setTripsState] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
 
@@ -25,9 +25,11 @@ export default function TripsSection() {
     const fetchTrips = async () => {
       try {
         setLoading(true);
-        const response = await getallTrips();
-        // console.log("Fetched trips:", response);
-        setTrips(response);
+  const response = await getallTrips();
+  // console.log("Fetched trips:", response);
+  setTripsState(response);
+  // persist in Redux for downstream usage (e.g., checkout)
+  dispatch(setTripsStore(response));
         setLoading(false);
       } catch (error) {
         // console.error("Error fetching trips:", error);
