@@ -8,7 +8,6 @@ import { getToken } from "@/lib/helpers/token";
 import { checkedInBooking, getBooking, paidBooking } from "../../../lib/apis/api";
 import { BOOKING_ADMIN } from "@/paths";
 
-// const url = "https://abudabbba-backend.vercel.app/api/bookings/admin"
 
 export default function GatePage() {
   const [status, setStatus] = useState("Point the camera towards the QR code");
