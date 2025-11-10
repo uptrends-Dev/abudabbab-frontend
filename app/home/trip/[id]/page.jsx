@@ -5,16 +5,16 @@ import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
-import { 
-  FaCalendarAlt, 
-  FaUsers, 
-  FaChild, 
-  FaBus, 
+import {
+  FaCalendarAlt,
+  FaUsers,
+  FaChild,
+  FaBus,
   FaArrowLeft,
   FaMapMarkerAlt,
   FaClock,
   FaCheckCircle,
-  FaInfoCircle
+  FaInfoCircle,
 } from "react-icons/fa";
 import { setBookingData } from "../../../../app/store/slice/checkoutSlice";
 import { upsertTrip } from "../../../../app/store/slice/tripsSlices";
@@ -22,7 +22,7 @@ import { getTrip } from "../../../../lib/apis/api";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function Page() {
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toISOString().split("T")[0];
   const { id } = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
@@ -66,7 +66,12 @@ export default function Page() {
   const egpPriceAdult = trip?.prices?.adult?.euro * currancy;
   const egpPriceChild = trip?.prices?.child?.euro * currancy;
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({
     defaultValues: { adult: 1, child: 0, date: "", transfer: false },
   });
 
@@ -76,20 +81,18 @@ export default function Page() {
 
   const totalEgp = useMemo(() => {
     if (!trip) return 0;
-    const baseTotal = (
+    const baseTotal =
       Number(egpPriceAdult.toFixed() || 0) * adult +
-      Number(egpPriceChild.toFixed() || 0) * child
-    );
+      Number(egpPriceChild.toFixed() || 0) * child;
     // No transfer fee added to total
     return baseTotal;
   }, [trip, adult, child, currancy]);
 
   const totalEuro = useMemo(() => {
     if (!trip) return 0;
-    const baseTotal = (
+    const baseTotal =
       Number(trip?.prices?.adult?.euro || 0) * adult +
-      Number(trip?.prices?.child?.euro || 0) * child
-    );
+      Number(trip?.prices?.child?.euro || 0) * child;
     // No transfer fee added to total
     return baseTotal;
   }, [trip, adult, child, currancy]);
@@ -97,108 +100,111 @@ export default function Page() {
   const onSubmit = (data) => {
     if (!trip) return;
 
-    dispatch(setBookingData({
-      adult: Number(data.adult),
-      child: Number(data.child),
-      transfer: !!data.transfer,
-      payment: !!data.payment,
-      bookingDate: data.date,
-      totalPrice: { egp: totalEgp, euro: totalEuro },
-      tripId: trip._id,
-    }));
-
-    toast.custom(
-      (t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } max-w-md w-full bg-white shadow-2xl rounded-2xl pointer-events-auto flex flex-col ring-1 ring-black ring-opacity-5 p-6`}
-        >
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center">
-                <FaCheckCircle className="text-white text-2xl" />
-              </div>
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-gray-900">
-                Booking Confirmed! 🎉
-              </h3>
-              <p className="mt-1 text-sm text-gray-600">
-                Your trip to{" "}
-                <span className="font-semibold text-orange-600">
-                  {trip?.name}
-                </span>{" "}
-                is ready for checkout.
-              </p>
-              <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
-                <span className="flex items-center gap-1">
-                  <FaCalendarAlt className="text-blue-600" />
-                  {data.date}
-                </span>
-                <span className="flex items-center gap-1">
-                  <FaUsers className="text-blue-600" />
-                  {adult} Adult{adult !== 1 ? "s" : ""}
-                  {child > 0 && `, ${child} Child${child !== 1 ? "ren" : ""}`}
-                </span>
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={() => toast.dismiss(t.id)}
-            className="mt-4 w-full bg-gradient-to-r from-blue-600 to-orange-500 text-white font-semibold py-2 px-4 rounded-lg hover:from-blue-700 hover:to-orange-600 transition-all"
-          >
-            OK
-          </button>
-        </div>
-      ),
-      {
-        duration: 5000,
-        position: "top-center",
-      }
+    dispatch(
+      setBookingData({
+        adult: Number(data.adult),
+        child: Number(data.child),
+        transfer: !!data.transfer,
+        payment: !!data.payment,
+        bookingDate: data.date,
+        totalPrice: { egp: totalEgp, euro: totalEuro },
+        tripId: trip._id,
+      })
     );
 
-    setTimeout(() => {
-      router.push("/home/trip/checkOut");
-    }, 800);
+    // toast.custom(
+    //   (t) => (
+    //     <div
+    //       className={`${
+    //         t.visible ? "animate-enter" : "animate-leave"
+    //       } max-w-md w-full bg-white shadow-2xl rounded-2xl pointer-events-auto flex flex-col ring-1 ring-black ring-opacity-5 p-6`}
+    //     >
+    //       <div className="flex items-start gap-4">
+    //         <div className="flex-shrink-0">
+    //           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center">
+    //             <FaCheckCircle className="text-white text-2xl" />
+    //           </div>
+    //         </div>
+    //         <div className="flex-1">
+    //           <h3 className="text-lg font-bold text-gray-900">
+    //             Booking Confirmed! 🎉
+    //           </h3>
+    //           <p className="mt-1 text-sm text-gray-600">
+    //             Your trip to{" "}
+    //             <span className="font-semibold text-orange-600">
+    //               {trip?.name}
+    //             </span>{" "}
+    //             is ready for checkout.
+    //           </p>
+    //           <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+    //             <span className="flex items-center gap-1">
+    //               <FaCalendarAlt className="text-blue-600" />
+    //               {data.date}
+    //             </span>
+    //             <span className="flex items-center gap-1">
+    //               <FaUsers className="text-blue-600" />
+    //               {adult} Adult{adult !== 1 ? "s" : ""}
+    //               {child > 0 && `, ${child} Child${child !== 1 ? "ren" : ""}`}
+    //             </span>
+    //           </div>
+    //         </div>
+    //       </div>
+    //       <button
+    //         onClick={() => toast.dismiss(t.id)}
+    //         className="mt-4 w-full bg-gradient-to-r from-blue-600 to-orange-500 text-white font-semibold py-2 px-4 rounded-lg hover:from-blue-700 hover:to-orange-600 transition-all"
+    //       >
+    //         OK
+    //       </button>
+    //     </div>
+    //   ),
+    //   {
+    //     duration: 5000,
+    //     position: "top-center",
+    //   }
+    // );
+
+    router.push("/home/trip/checkOut");
   };
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <div className="text-center">
-        <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-        <p className="mt-4 text-gray-600">Loading trip details...</p>
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        <div className="text-center">
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+          <p className="mt-4 text-gray-600">Loading trip details...</p>
+        </div>
       </div>
-    </div>
-  );
-  if (err) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-white to-orange-50">
-      <div className="text-center p-8 bg-white rounded-2xl shadow-lg border border-red-200">
-        <div className="text-red-500 text-5xl mb-4">⚠️</div>
-        <p className="text-red-600 font-semibold">Error: {err}</p>
-        <button 
-          onClick={() => router.back()}
-          className="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-        >
-          Go Back
-        </button>
+    );
+  if (err)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-white to-orange-50">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-lg border border-red-200">
+          <div className="text-red-500 text-5xl mb-4">⚠️</div>
+          <p className="text-red-600 font-semibold">Error: {err}</p>
+          <button
+            onClick={() => router.back()}
+            className="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+          >
+            Go Back
+          </button>
+        </div>
       </div>
-    </div>
-  );
-  if (!trip) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-slate-50">
-      <div className="text-center p-8 bg-white rounded-2xl shadow-lg border border-gray-200">
-        <div className="text-gray-400 text-5xl mb-4">🔍</div>
-        <p className="text-gray-600 font-semibold">Trip not found.</p>
-        <button 
-          onClick={() => router.push('/trips')}
-          className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-        >
-          Browse Trips
-        </button>
+    );
+  if (!trip)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-slate-50">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-lg border border-gray-200">
+          <div className="text-gray-400 text-5xl mb-4">🔍</div>
+          <p className="text-gray-600 font-semibold">Trip not found.</p>
+          <button
+            onClick={() => router.push("/trips")}
+            className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            Browse Trips
+          </button>
+        </div>
       </div>
-    </div>
-  );
+    );
 
   return (
     <div className="min-h-screen bg-white">
@@ -230,7 +236,9 @@ export default function Page() {
         {/* Brand Badge */}
         <div className="mb-3 inline-flex items-center gap-2 px-3 py-1.5 bg-white rounded-full shadow-sm border border-gray-200">
           <Dot />
-          <span className="text-sm font-medium text-gray-700">Originals by Abudabbab</span>
+          <span className="text-sm font-medium text-gray-700">
+            Originals by Abudabbab
+          </span>
         </div>
 
         {/* Title with enhanced styling */}
@@ -263,10 +271,18 @@ export default function Page() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </Img>
           <div className="md:col-span-3 grid grid-rows-2 gap-3 sm:gap-4 h-72 md:h-[440px]">
-            <Img src={trip.images?.[2]} alt="Trip highlight 2" className="row-span-1 group">
+            <Img
+              src={trip.images?.[2]}
+              alt="Trip highlight 2"
+              className="row-span-1 group"
+            >
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </Img>
-            <Img src={trip.images?.[3]} alt="Trip highlight 3" className="row-span-1 group">
+            <Img
+              src={trip.images?.[3]}
+              alt="Trip highlight 3"
+              className="row-span-1 group"
+            >
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </Img>
           </div>
@@ -280,7 +296,9 @@ export default function Page() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8">
               <div className="flex items-center gap-3 mb-4">
                 <FaInfoCircle className="text-blue-600 text-xl" />
-                <h2 className="text-2xl font-bold text-gray-900">Description</h2>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Description
+                </h2>
               </div>
               <p className="text-gray-700 leading-relaxed text-base">
                 {trip.description}
@@ -328,7 +346,7 @@ export default function Page() {
                   {/* Decorative elements */}
                   <div className="absolute top-0 right-0 w-40 h-40 bg-orange-500/5 rounded-full blur-3xl"></div>
                   <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-400/10 rounded-full blur-2xl"></div>
-                  
+
                   <div className="relative z-10">
                     <div className="mb-5 flex items-center justify-between">
                       <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
@@ -359,7 +377,8 @@ export default function Page() {
                                   Adults
                                 </label>
                                 <p className="text-xs text-blue-100">
-                                  €{trip?.prices?.adult?.euro ?? 0} / {egpPriceAdult.toFixed() ?? 0} EGP
+                                  €{trip?.prices?.adult?.euro ?? 0} /{" "}
+                                  {egpPriceAdult.toFixed() ?? 0} EGP
                                 </p>
                               </div>
                             </div>
@@ -403,21 +422,22 @@ export default function Page() {
                                   Children
                                 </label>
                                 <p className="text-xs text-blue-100">
-                                  €{trip?.prices?.child?.euro ?? 0} / {egpPriceChild.toFixed() ?? 0} EGP
+                                  €{trip?.prices?.child?.euro ?? 0} /{" "}
+                                  {egpPriceChild.toFixed() ?? 0} EGP
                                 </p>
                               </div>
                             </div>
                             <input
-                              {...register("child", { 
-                                required: false, 
+                              {...register("child", {
+                                required: false,
                                 min: {
                                   value: 0,
-                                  message: "Cannot be negative"
+                                  message: "Cannot be negative",
                                 },
                                 max: {
                                   value: 20,
-                                  message: "Maximum 20 children"
-                                }
+                                  message: "Maximum 20 children",
+                                },
                               })}
                               type="number"
                               id="child"
@@ -447,7 +467,9 @@ export default function Page() {
                               </label>
                             </div>
                             <input
-                              {...register("date", { required: "Date is required" })}
+                              {...register("date", {
+                                required: "Date is required",
+                              })}
                               type="date"
                               id="date"
                               min={today}
@@ -483,10 +505,16 @@ export default function Page() {
                         {/* Price Summary - Simplified */}
                         <div className="rounded-2xl bg-white/10 backdrop-blur-md ring-1 ring-white/20 px-5 py-4">
                           <div className="flex items-center justify-between">
-                            <span className="text-lg font-bold text-white">Total Price</span>
+                            <span className="text-lg font-bold text-white">
+                              Total Price
+                            </span>
                             <div className="text-right">
-                              <div className="text-2xl font-bold text-orange-400">€{totalEuro}</div>
-                              <div className="text-sm text-blue-100">{totalEgp.toFixed()} EGP</div>
+                              <div className="text-2xl font-bold text-orange-400">
+                                €{totalEuro}
+                              </div>
+                              <div className="text-sm text-blue-100">
+                                {totalEgp.toFixed()} EGP
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -534,7 +562,9 @@ const Dot = () => (
 );
 
 const Img = ({ src, alt, className, children }) => (
-  <div className={`relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 ${className}`}>
+  <div
+    className={`relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 ${className}`}
+  >
     <img
       src={src}
       alt={alt}
