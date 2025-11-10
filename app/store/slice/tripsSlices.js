@@ -34,6 +34,7 @@ const tripsSlice = createSlice({
         state.trips.push(trip);
       }
     },
+    
     // Clear trips (optional utility)
     clearTrips: (state) => {
       state.trips = [];
