@@ -155,9 +155,9 @@ export default function GatePage() {
                 <QrAutoScanner
                   onScanSuccess={(txt) => handleScanSuccess(txt)}
                   onScanError={(e) => handleScanError(e)}
-                  fps={12}
-                  qrBox={{ width: 280, height: 280 }}
-                  aspectRatio={1.777}
+                  // fps={12}
+                  // qrBox={{ width: 280, height: 280 }}
+                  // aspectRatio={1.777}
                   cameraFacingMode="environment"
                   continuous={false} // Will stop after first successful scan
                 />
