@@ -31,6 +31,9 @@ export default function QrAutoScanner({
 
 	useEffect(() => {
 		let isMounted = true;
+		// Reset fired flag on each mount/re-mount
+		firedSuccessRef.current = false;
+		startedRef.current = false;
 
 		async function init() {
 			if (!isMounted || startedRef.current || !containerRef.current) return;
@@ -110,7 +113,7 @@ export default function QrAutoScanner({
 				runningRef.current = false;
 			}
 		};
-	}, [fps, qrBox, aspectRatio, continuous, cameraFacingMode, onScanError, onScanSuccess]);
+	}, [fps, qrBox, aspectRatio, continuous, cameraFacingMode]); // Removed callback deps to prevent restarts
 
 	return (
 		<div className="w-full">
