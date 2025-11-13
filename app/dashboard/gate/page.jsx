@@ -152,7 +152,7 @@ export default function GatePage() {
                   qrBox={{ width: 280, height: 280 }}
                   aspectRatio={1}
                   cameraFacingMode="environment"
-                  continuous={false} // Will stop after first successful scan
+                  continuous={true} // Will stop after first successful scan
                 />
               </div>
             </div>
