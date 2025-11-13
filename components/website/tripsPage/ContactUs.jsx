@@ -136,7 +136,7 @@ export default function ContactUs() {
               </motion.div>
 
               {/* Email */}
-              <motion.div variants={blockV} className="flex items-start gap-4">
+              {/* <motion.div variants={blockV} className="flex items-start gap-4">
                 <motion.div
                   variants={badgeV}
                   className="grid h-12 w-12 place-items-center rounded-full bg-orange-500 text-white shadow ring-4 ring-orange-100"
@@ -147,7 +147,7 @@ export default function ContactUs() {
                   <p className="text-xs font-bold tracking-wide text-gray-700">Email :</p>
                   <p className="mt-1 text-sm text-gray-700">Exemple@Info.Com</p>
                 </div>
-              </motion.div>
+              </motion.div> */}
 
               {/* Divider + Socials */}
               <motion.div variants={blockV} className="pt-4">
