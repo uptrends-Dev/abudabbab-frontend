@@ -120,7 +120,9 @@ export default function GatePage() {
       cancelled = true;
     };
   }, [decoded]);
-
+ const qrReplace =  ()=>{
+    router.replace("/dashboard/gate");
+ } 
   return (
     <div
       dir="rtl"
@@ -128,9 +130,9 @@ export default function GatePage() {
     >
       <div className="max-w-5xl mx-auto p-6">
         <header className="flex items-center gap-3 mb-6">
-          <div className="w-14 h-14 rounded-xl bg-blue-500/90 flex items-center justify-center font-extrabold text-lg shadow-lg text-white">
+          <button onClick={qrReplace} className=" cursor-pointer w-14 h-14 rounded-xl bg-blue-500/90 flex items-center justify-center font-extrabold text-lg shadow-lg text-white">
             QR
-          </div>
+          </button>
           <div>
             <h1 className="text-3xl font-semibold text-white">Scan Gate</h1>
             <p className="text-gray-400 text-sm">
@@ -150,9 +152,9 @@ export default function GatePage() {
                   onScanError={(e) => handleScanError(e)}
                   fps={12}
                   qrBox={{ width: 280, height: 280 }}
-                  aspectRatio={1}
+                  aspectRatio={1.777}
                   cameraFacingMode="environment"
-                  continuous={true} // Will stop after first successful scan
+                  continuous={false} // Will stop after first successful scan
                 />
               </div>
             </div>
